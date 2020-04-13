@@ -3,7 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation"
-    app:startDestination="@id/titleFragment">
+    app:startDestination="@id/contactEventsFragment">
+
+    <fragment
+        android:id="@+id/contactEventsFragment"
+        android:name="org.covidwatch.android.ui.contactevents.ContactEventsFragment"
+        android:label="@string/title_contact_events"
+        tools:layout="@layout/fragment_contact_events" >
+    </fragment>
 
     <fragment
         android:id="@+id/titleFragment"

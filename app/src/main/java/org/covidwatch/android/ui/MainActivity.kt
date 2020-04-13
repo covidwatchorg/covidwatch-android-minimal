@@ -17,6 +17,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.work.*
 import org.covidwatch.android.R
 import org.covidwatch.android.ble.BluetoothManagerImpl
@@ -39,9 +43,13 @@ class MainActivity : AppCompatActivity() {
         // TODO #15: COMMENTING OUT BECAUSE USING EMULATOR
         // BRING BACK AFTER MERGING UX FIRST RUN
         // REMOVE adding example CEN
-        initBluetoothAdapter()
+//        initBluetoothAdapter()
         Log.i("test", "did we make it here?")
         addDummyCEN()
+
+        val navController = findNavController(R.id.nav_host_fragment)
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        setupActionBarWithNavController(navController, appBarConfiguration)
     }
 
     public override fun onResume() {

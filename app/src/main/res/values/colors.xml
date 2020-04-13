@@ -4,11 +4,13 @@
     <color name="colorIsCurrentUserNotSick">#4CAF50</color>
 
     <!-- Imported from UX Repo -->
-    <color name="colorPrimary">#BE3E49</color>
-    <color name="colorSecondary">#FFFFFF</color>
+    <color name="colorPrimary">#3f51b5</color>
+    <color name="colorPrimaryDark">#002984</color>
+    <color name="colorPrimaryLight">#757de8</color>
+    <color name="colorAccent">#9fa8da</color>
+
+    <color name="colorSecondary">#9fa8da</color>
     <color name="colorTertiary">#779F98</color>
-    <color name="colorPrimaryDark">#FFFFFF</color>
-    <color name="colorAccent">#03DAC5</color>
 
     <color name="splashBackgroundLight">#43C4D9</color>
     <color name="splashBackgroundDark">#2C58B1</color>
@@ -28,7 +30,6 @@
     <color name="white">#FFFFFF</color>
     <color name="maroon">#B04040</color>
     <color name="maroon_shadow">#A0A0A0</color>
-    <color name="colorPrimaryLight">#DFDFDF</color>
 
 <!-- FROM DESIGN LIBRARY AT https://www.figma.com/file/0qkRp3TrKBRnpEnmQeA5m4/-->
     <color name="bluejay">#2C58B1</color>
