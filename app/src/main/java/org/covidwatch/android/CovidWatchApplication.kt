@@ -4,23 +4,20 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.covidwatch.android.ble.BluetoothManagerImpl
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.data.firestore.ContactEventsDownloadWorker
 import org.covidwatch.android.data.firestore.LocalContactEventsUploader
-import org.tcncoalition.tcnclient.cen.GeneratedCen
 import org.tcncoalition.tcnclient.toBytes
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.TimeUnit
-
 
 class CovidWatchApplication : Application() {
 
@@ -61,7 +58,7 @@ class CovidWatchApplication : Application() {
 
     private fun configureAdvertising(enabled: Boolean) {
         if (enabled) {
-            bluetoothManager.startService(GeneratedCen(UUID.randomUUID().toBytes()))
+            bluetoothManager.startService(UUID.randomUUID().toBytes())
         } else {
             bluetoothManager.stopService()
         }

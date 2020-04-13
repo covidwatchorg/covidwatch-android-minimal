@@ -1,6 +1,10 @@
 package org.covidwatch.android.ble
 
-import android.app.*
+import android.app.Application
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Context.BIND_AUTO_CREATE
@@ -8,55 +12,70 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
-import org.covidwatch.android.ui.MainActivity
 import org.covidwatch.android.R
 import org.covidwatch.android.data.ContactEvent
 import org.covidwatch.android.data.ContactEventDAO
 import org.covidwatch.android.data.CovidWatchDatabase
-import org.tcncoalition.tcnclient.BluetoothService
-import org.tcncoalition.tcnclient.BluetoothService.LocalBinder
-import org.tcncoalition.tcnclient.cen.*
+import org.covidwatch.android.ui.MainActivity
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService.LocalBinder
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
 import org.tcncoalition.tcnclient.toBytes
 import org.tcncoalition.tcnclient.toUUID
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 interface BluetoothManager {
-    fun startAdvertiser(cen: Cen)
     fun stopAdvertiser()
 
-    fun startService(cen: Cen)
+    fun startService(tcn: ByteArray)
     fun stopService()
 
-    fun changeAdvertisedValue(cen: Cen)
+    fun changeAdvertisedValue(tcn: ByteArray)
 }
 
 class BluetoothManagerImpl(
     private val app: Application
 ) : BluetoothManager {
 
-    private val intent get() = Intent(app, BluetoothService::class.java)
+    private val intent get() = Intent(app, TcnBluetoothService::class.java)
 
-    private var service: BluetoothService? = null
+    private var service: TcnBluetoothService? = null
 
-    private val cenGenerator = DefaultCenGenerator()
-    private val cenVisitor = DefaultCenVisitor(app)
+    private var tcn: ByteArray? = null
     private var timer: Timer? = null
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             this@BluetoothManagerImpl.service = (service as LocalBinder).service.apply {
-                configure(
-                    BluetoothService.ServiceConfiguration(
-                        cenGenerator,
-                        cenVisitor,
-                        foregroundNotification()
-                    )
+                setTcnCallback(
+                    object : TcnBluetoothServiceCallback {
+                        override fun generateTcn() = tcn?: UUID.randomUUID().toBytes()
+
+                        override fun onTcnFound(tcn: ByteArray) {
+                            CovidWatchDatabase.databaseWriteExecutor.execute {
+                                val dao: ContactEventDAO =
+                                    CovidWatchDatabase.getInstance(app).contactEventDAO()
+                                val contactEvent = ContactEvent(tcn.toUUID().toString())
+                                val isCurrentUserSick = app.getSharedPreferences(
+                                    app.getString(R.string.preference_file_key),
+                                    Context.MODE_PRIVATE
+                                ).getBoolean(
+                                    app.getString(R.string.preference_is_current_user_sick),
+                                    false
+                                )
+                                contactEvent.wasPotentiallyInfectious = isCurrentUserSick
+                                dao.insert(contactEvent)
+                            }
+                        }
+                    }
                 )
-                start()
+                setForegroundNotification(foregroundNotification())
+                startTcnExchange()
             }
 
             runTimer()
@@ -96,28 +115,22 @@ class BluetoothManagerImpl(
             .build()
     }
 
-    override fun changeAdvertisedValue(cen: Cen) {
-        cenGenerator.cen = cen
+    override fun changeAdvertisedValue(tcn: ByteArray) {
         service?.updateCen()
     }
 
-    override fun startAdvertiser(cen: Cen) {
-        cenGenerator.cen = cen
-        service?.startAdvertiser()
-    }
-
-    override fun startService(cen: Cen) {
-        cenGenerator.cen = cen
+    override fun startService(tcn: ByteArray) {
+        this.tcn = tcn
         app.bindService(intent, serviceConnection, BIND_AUTO_CREATE)
         app.startService(intent)
     }
 
     override fun stopAdvertiser() {
-        service?.stopAdvertiser()
+        service?.stopTcnExchange()
     }
 
     override fun stopService() {
-        service?.stopAdvertiser()
+        service?.stopTcnExchange()
         app.stopService(intent)
     }
 
@@ -140,42 +153,9 @@ class BluetoothManagerImpl(
         }
     }
 
-    inner class DefaultCenVisitor(private val ctx: Context) : CenVisitor {
-        private fun handleCEN(cen: Cen) {
-            Log.i(TAG, "Running handleCEN")
-            CovidWatchDatabase.databaseWriteExecutor.execute {
-                val dao: ContactEventDAO = CovidWatchDatabase.getInstance(ctx).contactEventDAO()
-                val contactEvent = ContactEvent(cen.data.toUUID().toString())
-                val isCurrentUserSick = ctx.getSharedPreferences(
-                    ctx.getString(R.string.preference_file_key),
-                    Context.MODE_PRIVATE
-                ).getBoolean(ctx.getString(R.string.preference_is_current_user_sick), false)
-                contactEvent.wasPotentiallyInfectious = isCurrentUserSick
-                dao.insert(contactEvent)
-            }
-        }
-
-        override fun visit(cen: GeneratedCen) {
-            Log.i(TAG, "Handling generated CEN")
-            this.handleCEN(cen)
-        }
-
-        override fun visit(cen: ObservedCen) {
-            Log.i(TAG, "Handling observed CEN")
-            this.handleCEN(cen)
-        }
-    }
-
-    class DefaultCenGenerator(var cen: Cen? = null) : CenGenerator {
-        override fun generate(): GeneratedCen {
-            return   GeneratedCen(UUID.randomUUID().toBytes())
-        }
-    }
-
     companion object {
         // CONSTANTS
         private const val CEN_CHANGE_INTERVAL_MIN = 15L
         private const val CHANNEL_ID = "CovidBluetoothContactChannel"
-        private const val TAG = "BluetoothManagers"
     }
 }
