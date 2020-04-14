@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
             android:textColor="@android:color/secondary_text_light"
-            android:text="@{contactEvent.timestamp.toGMTString()}"
+            app:bindRelativeDate="@{contactEvent.timestamp}"
             tools:text="Title" />
 
         <TextView
