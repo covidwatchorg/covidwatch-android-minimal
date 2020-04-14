@@ -1,4 +1,4 @@
-package org.covidwatch.android.ui.contactevents
+package org.covidwatch.android.ui.temporarycontactnumbers
 
 import android.Manifest
 import android.app.Application
@@ -14,7 +14,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingComponent
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -24,17 +23,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
-import org.covidwatch.android.ui.contactevents.adapters.FragmentDataBindingComponent
-import org.covidwatch.android.data.ContactEventDAO
+import org.covidwatch.android.ui.temporarycontactnumbers.adapters.FragmentDataBindingComponent
+import org.covidwatch.android.data.TemporaryContactNumberDAO
 import org.covidwatch.android.data.CovidWatchDatabase
-import org.covidwatch.android.databinding.FragmentContactEventsBinding
+import org.covidwatch.android.databinding.FragmentTemporaryContactNumbersBinding
 
 
-class ContactEventsFragment : Fragment() {
+class TemporaryContactNumbersFragment : Fragment() {
 
-    private lateinit var contactEventsViewModel: ContactEventsViewModel
+    private lateinit var temporaryContactNumbersViewModel: TemporaryContactNumbersViewModel
     private lateinit var vm: BluetoothViewModel
-    private lateinit var binding: FragmentContactEventsBinding
+    private lateinit var binding: FragmentTemporaryContactNumbersBinding
     private var dataBindingComponent: DataBindingComponent = FragmentDataBindingComponent(this)
 
     override fun onCreateView(
@@ -45,29 +44,29 @@ class ContactEventsFragment : Fragment() {
         val context = context ?: return null
 
         val database = CovidWatchDatabase.getInstance(context)
-        val viewModel: ContactEventsViewModel by viewModels(factoryProducer = {
-            ContactEventsViewModelFactory(database.contactEventDAO(), context.applicationContext as Application)
+        val viewModelTemporary: TemporaryContactNumbersViewModel by viewModels(factoryProducer = {
+            TemporaryContactNumbersViewModelFactory(database.tempraryContactNumberDAO(), context.applicationContext as Application)
         })
-        contactEventsViewModel = viewModel
+        temporaryContactNumbersViewModel = viewModelTemporary
         vm = ViewModelProvider(this).get(BluetoothViewModel::class.java)
 
         binding =
-            DataBindingUtil.inflate<FragmentContactEventsBinding>(
+            DataBindingUtil.inflate<FragmentTemporaryContactNumbersBinding>(
                 inflater,
-                R.layout.fragment_contact_events,
+                R.layout.fragment_temporary_contact_numbers,
                 container,
                 false,
                 dataBindingComponent
             ).apply {
-                lifecycleOwner = this@ContactEventsFragment
+                lifecycleOwner = this@TemporaryContactNumbersFragment
             }
 
-        val adapter = ContactEventsAdapter()
-        binding.contactEventsRecyclerview.adapter = adapter
-        binding.contactEventsRecyclerview.addItemDecoration(
+        val adapter = TemporaryContactNumbersAdapter()
+        binding.temporaryContactNumbersRecyclerview.adapter = adapter
+        binding.temporaryContactNumbersRecyclerview.addItemDecoration(
             DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
         )
-        viewModel.contactEvents.observe(viewLifecycleOwner, Observer { adapter.submitList(it) })
+        viewModelTemporary.temporaryContactEvents.observe(viewLifecycleOwner, Observer { adapter.submitList(it) })
 
         setHasOptionsMenu(true)
 
@@ -76,11 +75,11 @@ class ContactEventsFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         val isContactEventLoggingEnabled =
-            contactEventsViewModel.isContactEventLoggingEnabled.value ?: false
+            temporaryContactNumbersViewModel.isContactEventLoggingEnabled.value ?: false
         if (isContactEventLoggingEnabled) {
-            inflater.inflate(R.menu.menu_contact_events_stop, menu)
+            inflater.inflate(R.menu.menu_temporary_contact_numbers_stop, menu)
         } else {
-            inflater.inflate(R.menu.menu_contact_events_start, menu)
+            inflater.inflate(R.menu.menu_temporary_contact_numbers_start, menu)
         }
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -114,9 +113,9 @@ class ContactEventsFragment : Fragment() {
                         setPositiveButton(getString(R.string.title_clear),
                             DialogInterface.OnClickListener { dialog, id ->
                                 CovidWatchDatabase.databaseWriteExecutor.execute {
-                                    val dao: ContactEventDAO =
-                                        CovidWatchDatabase.getInstance(requireActivity()).contactEventDAO()
-                                    dao.deleteAll()
+                                    val daoTemporary: TemporaryContactNumberDAO =
+                                        CovidWatchDatabase.getInstance(requireActivity()).tempraryContactNumberDAO()
+                                    daoTemporary.deleteAll()
                                 }
                             })
                         setNegativeButton(getString(R.string.title_cancel),
@@ -145,7 +144,7 @@ class ContactEventsFragment : Fragment() {
 
     private fun setContactEventLogging(enabled: Boolean) {
 
-        contactEventsViewModel.isContactEventLoggingEnabled.value = enabled
+        temporaryContactNumbersViewModel.isContactEventLoggingEnabled.value = enabled
 
         val application = context?.applicationContext ?: return
         val sharedPref = application.getSharedPreferences(
@@ -153,7 +152,7 @@ class ContactEventsFragment : Fragment() {
         ) ?: return
         with(sharedPref.edit()) {
             putBoolean(
-                application.getString(R.string.preference_is_contact_event_logging_enabled),
+                application.getString(R.string.preference_is_temporary_contact_number_logging_enabled),
                 enabled
             )
             commit()
@@ -176,7 +175,7 @@ class ContactEventsFragment : Fragment() {
 
     /**
      * Initializes the Location Manager used to obtain coarse bluetooth/wifi location
-     * and fine GPS location, logged on a contact event.
+     * and fine GPS location, logged on a temporary contact number.
      *
      * TODO add GPS initialization here, for now we just ask for location permissions
      */

@@ -1,4 +1,4 @@
-package org.covidwatch.android.ui.contactevents.adapters
+package org.covidwatch.android.ui.temporarycontactnumbers.adapters
 
 import androidx.fragment.app.Fragment
 

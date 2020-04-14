@@ -1,4 +1,4 @@
-package org.covidwatch.android.ui.contactevents.adapters
+package org.covidwatch.android.ui.temporarycontactnumbers.adapters
 
 import android.text.format.DateUtils
 import android.widget.TextView

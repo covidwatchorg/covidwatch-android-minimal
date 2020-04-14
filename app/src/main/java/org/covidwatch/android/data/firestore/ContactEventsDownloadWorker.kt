@@ -11,7 +11,7 @@ import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import org.covidwatch.android.R
-import org.covidwatch.android.data.ContactEventDAO
+import org.covidwatch.android.data.TemporaryContactNumberDAO
 import org.covidwatch.android.data.CovidWatchDatabase
 import java.util.*
 
@@ -27,7 +27,7 @@ class ContactEventsDownloadWorker(var context: Context, workerParams: WorkerPara
 
     override fun doWork(): Result {
 
-        Log.i(TAG, "Downloading contact events")
+        Log.i(TAG, "Downloading temporary contact numbers")
 
         val now = Date()
 
@@ -36,7 +36,7 @@ class ContactEventsDownloadWorker(var context: Context, workerParams: WorkerPara
             context.getString(R.string.preference_file_key),
             Context.MODE_PRIVATE
         ).getLong(
-            context.getString(R.string.preference_last_contact_events_download_date),
+            context.getString(R.string.preference_last_temporary_contact_numbers_download_date),
             lastFetchTime.time
         )
         if (fetchSinceTime < lastFetchTime.time) {
@@ -44,7 +44,7 @@ class ContactEventsDownloadWorker(var context: Context, workerParams: WorkerPara
         }
 
         val task =
-            FirebaseFirestore.getInstance().collection(FirestoreConstants.COLLECTION_CONTACT_EVENTS)
+            FirebaseFirestore.getInstance().collection(FirestoreConstants.COLLECTION_TEMPORARY_CONTACT_NUMBERS)
                 .whereGreaterThan(
                     FirestoreConstants.FIELD_TIMESTAMP,
                     Timestamp(Date(fetchSinceTime))
@@ -58,7 +58,7 @@ class ContactEventsDownloadWorker(var context: Context, workerParams: WorkerPara
                         if (queryDocumentSnapshots != null) {
                             Log.i(
                                 TAG,
-                                "Downloaded ${queryDocumentSnapshots.size()} contact event(s)"
+                                "Downloaded ${queryDocumentSnapshots.size()} temporary contact number(s)"
                             )
                             result = try {
                                 val addedDocumentChanges =
@@ -79,7 +79,7 @@ class ContactEventsDownloadWorker(var context: Context, workerParams: WorkerPara
                                     ).edit()
                                 ) {
                                     putLong(
-                                        context.getString(R.string.preference_last_contact_events_download_date),
+                                        context.getString(R.string.preference_last_temporary_contact_numbers_download_date),
                                         now.time
                                     )
                                     commit()
@@ -111,17 +111,17 @@ class ContactEventsDownloadWorker(var context: Context, workerParams: WorkerPara
         if (documentChanges.isEmpty()) return
         Log.d(
             TAG,
-            "Marking ${documentChanges.size} contact event(s) as potentially infectious=$wasPotentiallyInfectious ..."
+            "Marking ${documentChanges.size} temporary contact number(s) as potentially infectious=$wasPotentiallyInfectious ..."
         )
-        val dao: ContactEventDAO = CovidWatchDatabase.getInstance(context).contactEventDAO()
+        val daoTemporary: TemporaryContactNumberDAO = CovidWatchDatabase.getInstance(context).tempraryContactNumberDAO()
         val identifiers = documentChanges.map { it.document.id }
         val chunkSize = 998 // SQLITE_MAX_VARIABLE_NUMBER - 1
-        identifiers.chunked(chunkSize).forEach {
-            dao.update(it, wasPotentiallyInfectious)
-            Log.d(
-                TAG,
-                "Marked ${it.size} contact event(s) as potentially infectious=$wasPotentiallyInfectious"
-            )
-        }
+//        identifiers.chunked(chunkSize).forEach {
+//            daoTemporary.update(it, wasPotentiallyInfectious)
+//            Log.d(
+//                TAG,
+//                "Marked ${it.size} temporary contact number(s) as potentially infectious=$wasPotentiallyInfectious"
+//            )
+//        }
     }
 }

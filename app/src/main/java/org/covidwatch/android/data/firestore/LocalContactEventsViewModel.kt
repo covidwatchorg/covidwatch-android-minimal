@@ -3,13 +3,13 @@ package org.covidwatch.android.data.firestore
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import org.covidwatch.android.data.ContactEvent
-import org.covidwatch.android.data.ContactEventDAO
+import org.covidwatch.android.data.TemporaryContactNumber
+import org.covidwatch.android.data.TemporaryContactNumberDAO
 
 class LocalContactEventsViewModel(
-    contactEventDAO: ContactEventDAO,
+    temporaryContactNumberDAO: TemporaryContactNumberDAO,
     application: Application
 ) : AndroidViewModel(application) {
 
-    val contactEvents: LiveData<List<ContactEvent>> = contactEventDAO.allSortedByDescTimestamp
+    val temporaryContactEvents: LiveData<List<TemporaryContactNumber>> = temporaryContactNumberDAO.allSortedByDescTimestamp
 }

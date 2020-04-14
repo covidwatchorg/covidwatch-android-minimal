@@ -15,7 +15,7 @@ class CurrentUserExposureNotifier(var application: Application) {
 
     private val viewModel: LocalContactEventsViewModel =
         LocalContactEventsViewModel(
-            CovidWatchDatabase.getInstance(application).contactEventDAO(),
+            CovidWatchDatabase.getInstance(application).tempraryContactNumberDAO(),
             application
         )
 
@@ -23,7 +23,7 @@ class CurrentUserExposureNotifier(var application: Application) {
 
         createNotificationChannel()
 
-        viewModel.contactEvents.observeForever(Observer {
+        viewModel.temporaryContactEvents.observeForever(Observer {
             val isCurrentUserSick = application.getSharedPreferences(
                 application.getString(R.string.preference_file_key),
                 Context.MODE_PRIVATE
@@ -31,8 +31,8 @@ class CurrentUserExposureNotifier(var application: Application) {
 
             // No need to notify current user of exposure if they are already sick
             if (isCurrentUserSick) return@Observer
-            // No need to notify if there aren't any potentially infectious contact events
-            it.firstOrNull { contactEvent -> contactEvent.wasPotentiallyInfectious }
+            // No need to notify if there aren't any potentially infectious temporary contact numbers
+            it.firstOrNull { tempraryContactNumber -> tempraryContactNumber.wasPotentiallyInfectious }
                 ?: return@Observer
 
             notifyCurrentUserOfExposure()

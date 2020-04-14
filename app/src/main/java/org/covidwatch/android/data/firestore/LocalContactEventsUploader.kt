@@ -5,67 +5,67 @@ import android.util.Log
 import androidx.lifecycle.Observer
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import org.covidwatch.android.data.ContactEvent
+import org.covidwatch.android.data.TemporaryContactNumber
 import org.covidwatch.android.data.CovidWatchDatabase
 
 class LocalContactEventsUploader(var application: Application) {
 
     private val viewModel: LocalContactEventsViewModel = LocalContactEventsViewModel(
-        CovidWatchDatabase.getInstance(application).contactEventDAO(),
+        CovidWatchDatabase.getInstance(application).tempraryContactNumberDAO(),
         application
     )
 
-    private val contactEventDAO =
-        CovidWatchDatabase.getInstance(application).contactEventDAO()
+    private val tempraryContactNumberDAO =
+        CovidWatchDatabase.getInstance(application).tempraryContactNumberDAO()
 
     fun startUploading() {
-        viewModel.contactEvents.observeForever(Observer {
-            uploadContactEventsIfNeeded(it)
-        })
+//        viewModel.temporaryContactEvents.observeForever(Observer {
+//            uploadContactEventsIfNeeded(it)
+//        })
     }
 
-    private fun uploadContactEventsIfNeeded(contactEvents: List<ContactEvent>) {
-        val contactEventsToUpload = contactEvents.filter {
-            it.wasPotentiallyInfectious && it.uploadState == ContactEvent.UploadState.NOTUPLOADED
-        }
-        uploadContactEvents(contactEventsToUpload)
-    }
-
-    private fun uploadContactEvents(contactEvents: List<ContactEvent>) {
-        if (contactEvents.isEmpty()) return
-        Log.i(TAG, "Uploading ${contactEvents.size} contact event(s)...")
-        CovidWatchDatabase.databaseWriteExecutor.execute {
-            contactEvents.forEach { it.uploadState = ContactEvent.UploadState.UPLOADING }
-            contactEventDAO.update(contactEvents)
-        }
-        val db = FirebaseFirestore.getInstance()
-        db.runBatch { batch ->
-            contactEvents.forEach {
-                batch.set(
-                    db.collection(FirestoreConstants.COLLECTION_CONTACT_EVENTS)
-                        .document(it.identifier),
-                    hashMapOf(FirestoreConstants.FIELD_TIMESTAMP to Timestamp(it.timestamp))
-                )
-            }
-        }.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.i(TAG, "Uploaded ${contactEvents.size} contact event(s)")
-                CovidWatchDatabase.databaseWriteExecutor.execute {
-                    contactEvents.forEach { it.uploadState = ContactEvent.UploadState.UPLOADED }
-                    contactEventDAO.update(contactEvents)
-                }
-            } else {
-                Log.d(
-                    TAG,
-                    "Uploading ${contactEvents.size} contact event(s) failed: ${task.exception}"
-                )
-                CovidWatchDatabase.databaseWriteExecutor.execute {
-                    contactEvents.forEach { it.uploadState = ContactEvent.UploadState.NOTUPLOADED }
-                    contactEventDAO.update(contactEvents)
-                }
-            }
-        }
-    }
+//    private fun uploadContactEventsIfNeeded(temporaryContactNumbers: List<TemporaryContactNumber>) {
+//        val temporaryContactNumbersToUpload = temporaryContactNumbers.filter {
+//            it.wasPotentiallyInfectious && it.uploadState == TemporaryContactNumber.UploadState.NOTUPLOADED
+//        }
+//        uploadContactEvents(temporaryContactNumbersToUpload)
+//    }
+//
+//    private fun uploadContactEvents(temporaryContactNumbers: List<TemporaryContactNumber>) {
+//        if (temporaryContactNumbers.isEmpty()) return
+//        Log.i(TAG, "Uploading ${temporaryContactNumbers.size} temporary contact number(s)...")
+//        CovidWatchDatabase.databaseWriteExecutor.execute {
+//            temporaryContactNumbers.forEach { it.uploadState = TemporaryContactNumber.UploadState.UPLOADING }
+//            tempraryContactNumberDAO.update(temporaryContactNumbers)
+//        }
+//        val db = FirebaseFirestore.getInstance()
+//        db.runBatch { batch ->
+//            temporaryContactNumbers.forEach {
+////                batch.set(
+////                    db.collection(FirestoreConstants.COLLECTION_TEMPORARY_CONTACT_NUMBERS)
+////                        .document(it.bytes),
+////                    hashMapOf(FirestoreConstants.FIELD_TIMESTAMP to Timestamp(it.foundDate))
+////                )
+//            }
+//        }.addOnCompleteListener { task ->
+//            if (task.isSuccessful) {
+//                Log.i(TAG, "Uploaded ${temporaryContactNumbers.size} temporary contact number(s)")
+//                CovidWatchDatabase.databaseWriteExecutor.execute {
+//                    temporaryContactNumbers.forEach { it.uploadState = TemporaryContactNumber.UploadState.UPLOADED }
+//                    tempraryContactNumberDAO.update(temporaryContactNumbers)
+//                }
+//            } else {
+//                Log.d(
+//                    TAG,
+//                    "Uploading ${temporaryContactNumbers.size} temporary contact number(s) failed: ${task.exception}"
+//                )
+//                CovidWatchDatabase.databaseWriteExecutor.execute {
+//                    temporaryContactNumbers.forEach { it.uploadState = TemporaryContactNumber.UploadState.NOTUPLOADED }
+//                    tempraryContactNumberDAO.update(temporaryContactNumbers)
+//                }
+//            }
+//        }
+//    }
 
     companion object {
         private const val TAG = "LocalContactEventsUploader"

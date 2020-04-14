@@ -37,18 +37,18 @@ class CovidWatchApplication : Application() {
                     )
                     Log.i(TAG, "Current user is sick=$isCurrentUserSick")
                     if (isCurrentUserSick) {
-                        Log.i(TAG, "Marking all local contact events as potentially infectious...")
+                        Log.i(TAG, "Marking all local temporary contact numbers as potentially infectious...")
                         CovidWatchDatabase.databaseWriteExecutor.execute {
                             CovidWatchDatabase.getInstance(this)
-                                .contactEventDAO()
+                                .tempraryContactNumberDAO()
                                 .markAllAsPotentiallyInfectious()
-                            Log.i(TAG, "Marked all local contact events as potentially infectious")
+                            Log.i(TAG, "Marked all local temporary contact numbers as potentially infectious")
                         }
                     }
                 }
-                getString(R.string.preference_is_contact_event_logging_enabled) -> {
+                getString(R.string.preference_is_temporary_contact_number_logging_enabled) -> {
                     val isContactEventLoggingEnabled = sharedPreferences.getBoolean(
-                        getString(R.string.preference_is_contact_event_logging_enabled),
+                        getString(R.string.preference_is_temporary_contact_number_logging_enabled),
                         false
                     )
                     configureAdvertising(isContactEventLoggingEnabled)
@@ -84,7 +84,7 @@ class CovidWatchApplication : Application() {
         val isContactEventLoggingEnabled = getSharedPreferences(
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         ).getBoolean(
-            getString(R.string.preference_is_contact_event_logging_enabled),
+            getString(R.string.preference_is_temporary_contact_number_logging_enabled),
             false
         )
         configureAdvertising(isContactEventLoggingEnabled)

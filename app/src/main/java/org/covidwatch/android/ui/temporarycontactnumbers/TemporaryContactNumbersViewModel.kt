@@ -1,4 +1,4 @@
-package org.covidwatch.android.ui.contactevents
+package org.covidwatch.android.ui.temporarycontactnumbers
 
 import android.app.Application
 import android.content.Context
@@ -8,20 +8,20 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import org.covidwatch.android.R
-import org.covidwatch.android.data.ContactEvent
-import org.covidwatch.android.data.ContactEventDAO
+import org.covidwatch.android.data.TemporaryContactNumber
+import org.covidwatch.android.data.TemporaryContactNumberDAO
 
-class ContactEventsViewModel(contactEventDAO: ContactEventDAO, application: Application) : AndroidViewModel(application) {
+class TemporaryContactNumbersViewModel(temporaryContactNumberDAO: TemporaryContactNumberDAO, application: Application) : AndroidViewModel(application) {
 
-    val contactEvents: LiveData<PagedList<ContactEvent>> =
-        contactEventDAO.pagedAllSortedByDescTimestamp.toLiveData(pageSize = 50)
+    val temporaryContactEvents: LiveData<PagedList<TemporaryContactNumber>> =
+        temporaryContactNumberDAO.pagedAllSortedByDescTimestamp.toLiveData(pageSize = 50)
 
     var isContactEventLoggingEnabled = MutableLiveData<Boolean>().apply {
         val isEnabled = application.getSharedPreferences(
             application.getString(R.string.preference_file_key),
             Context.MODE_PRIVATE
         ).getBoolean(
-            application.getString(R.string.preference_is_contact_event_logging_enabled),
+            application.getString(R.string.preference_is_temporary_contact_number_logging_enabled),
             false
         )
         value = isEnabled

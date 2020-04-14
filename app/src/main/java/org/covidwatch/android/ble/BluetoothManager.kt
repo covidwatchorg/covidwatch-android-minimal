@@ -15,8 +15,8 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
-import org.covidwatch.android.data.ContactEvent
-import org.covidwatch.android.data.ContactEventDAO
+import org.covidwatch.android.data.TemporaryContactNumber
+import org.covidwatch.android.data.TemporaryContactNumberDAO
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.ui.MainActivity
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService
@@ -58,9 +58,10 @@ class BluetoothManagerImpl(
 
                         override fun onTcnFound(tcn: ByteArray) {
                             CovidWatchDatabase.databaseWriteExecutor.execute {
-                                val dao: ContactEventDAO =
-                                    CovidWatchDatabase.getInstance(app).contactEventDAO()
-                                val contactEvent = ContactEvent(tcn.toUUID().toString())
+                                val daoTemporary: TemporaryContactNumberDAO =
+                                    CovidWatchDatabase.getInstance(app).tempraryContactNumberDAO()
+                                val tempraryContactNumber = TemporaryContactNumber()
+                                tempraryContactNumber.bytes = tcn
                                 val isCurrentUserSick = app.getSharedPreferences(
                                     app.getString(R.string.preference_file_key),
                                     Context.MODE_PRIVATE
@@ -68,8 +69,8 @@ class BluetoothManagerImpl(
                                     app.getString(R.string.preference_is_current_user_sick),
                                     false
                                 )
-                                contactEvent.wasPotentiallyInfectious = isCurrentUserSick
-                                dao.insert(contactEvent)
+                                tempraryContactNumber.wasPotentiallyInfectious = isCurrentUserSick
+                                daoTemporary.insert(tempraryContactNumber)
                             }
                         }
                     }
@@ -85,7 +86,7 @@ class BluetoothManagerImpl(
     }
 
     private fun runTimer() {
-        // scheduler a new timer to start changing the contact event numbers
+        // scheduler a new timer to start changing the temporary contact number numbers
         timer?.cancel()
         timer = Timer()
         timer?.scheduleAtFixedRate(

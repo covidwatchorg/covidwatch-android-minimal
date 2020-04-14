@@ -1,6 +1,5 @@
 package org.covidwatch.android.ui
 
-import android.Manifest
 import android.Manifest.permission.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -15,19 +14,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.work.*
 import org.covidwatch.android.R
-import org.covidwatch.android.ble.BluetoothManagerImpl
 import org.covidwatch.android.data.BluetoothViewModel
-import org.covidwatch.android.data.ContactEventDAO
-import org.covidwatch.android.data.ContactEvent
-import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.data.firestore.ContactEventsDownloadWorker
 
 class MainActivity : AppCompatActivity() {
@@ -58,19 +51,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     public fun addDummyCEN() {
-        val cen = BluetoothManagerImpl.DefaultCenGenerator().generate()
-        Log.i("test", "how about here?")
-        Log.i("CEN BOI", cen.data.toString())
-        CovidWatchDatabase.databaseWriteExecutor.execute {
-            val dao: ContactEventDAO = CovidWatchDatabase.getInstance(this).contactEventDAO()
-            val contactEvent = ContactEvent(cen.data.toString())
-            val isCurrentUserSick = this.getSharedPreferences(
-                this.getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            ).getBoolean(this.getString(R.string.preference_is_current_user_sick), false)
-            contactEvent.wasPotentiallyInfectious = isCurrentUserSick
-            dao.insert(contactEvent)
-        }
+//        val cen = BluetoothManagerImpl.DefaultCenGenerator().generate()
+//        Log.i("test", "how about here?")
+//        Log.i("CEN BOI", cen.data.toString())
+//        CovidWatchDatabase.databaseWriteExecutor.execute {
+//            val dao: ContactEventDAO = CovidWatchDatabase.getInstance(this).tempraryContactNumberDAO()
+//            val tempraryContactNumber = ContactEvent(cen.data.toString())
+//            val isCurrentUserSick = this.getSharedPreferences(
+//                this.getString(R.string.preference_file_key),
+//                Context.MODE_PRIVATE
+//            ).getBoolean(this.getString(R.string.preference_is_current_user_sick), false)
+//            tempraryContactNumber.wasPotentiallyInfectious = isCurrentUserSick
+//            dao.insert(tempraryContactNumber)
+//        }
     }
 
     private fun setContactEventLogging(enabled: Boolean) {
@@ -81,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         ) ?: return
         with(sharedPref.edit()) {
             putBoolean(
-                application.getString(org.covidwatch.android.R.string.preference_is_contact_event_logging_enabled),
+                application.getString(org.covidwatch.android.R.string.preference_is_temporary_contact_number_logging_enabled),
                 enabled
             )
             commit()
@@ -123,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Initializes the Location Manager used to obtain coarse bluetooth/wifi location
-     * and fine GPS location, logged on a contact event.
+     * and fine GPS location, logged on a temporary contact number.
      *
      * TODO add GPS initialization here, for now we just ask for location permissions
      */
