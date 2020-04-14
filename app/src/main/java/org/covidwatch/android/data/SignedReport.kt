@@ -17,7 +17,6 @@ class SignedReport {
     @ColumnInfo(name = "is_processed")
     var isProcessed: Boolean = false
 
-    @PrimaryKey
     @ColumnInfo(name = "memo_data", typeAffinity = ColumnInfo.BLOB)
     var memoData: ByteArray = ByteArray(0)
 
@@ -27,6 +26,7 @@ class SignedReport {
     @ColumnInfo(name = "report_verification_public_key_bytes", typeAffinity = ColumnInfo.BLOB)
     var reportVerificationPublicKeyBytes: ByteArray = ByteArray(0)
 
+    @PrimaryKey
     @ColumnInfo(name = "signature_bytes", typeAffinity = ColumnInfo.BLOB)
     var signatureBytes: ByteArray = ByteArray(0)
 
