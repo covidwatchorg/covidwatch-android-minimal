@@ -15,8 +15,6 @@ import org.covidwatch.android.ble.BluetoothManagerImpl
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.data.firestore.ContactEventsDownloadWorker
 import org.covidwatch.android.data.firestore.LocalContactEventsUploader
-import org.tcncoalition.tcnclient.toBytes
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class CovidWatchApplication : Application() {
@@ -51,14 +49,14 @@ class CovidWatchApplication : Application() {
                         getString(R.string.preference_is_temporary_contact_number_logging_enabled),
                         false
                     )
-                    configureAdvertising(isContactEventLoggingEnabled)
+                    configureContactTracing(isContactEventLoggingEnabled)
                 }
             }
         }
 
-    private fun configureAdvertising(enabled: Boolean) {
+    private fun configureContactTracing(enabled: Boolean) {
         if (enabled) {
-            bluetoothManager.startService(UUID.randomUUID().toBytes())
+            bluetoothManager.startService()
         } else {
             bluetoothManager.stopService()
         }
@@ -87,7 +85,7 @@ class CovidWatchApplication : Application() {
             getString(R.string.preference_is_temporary_contact_number_logging_enabled),
             false
         )
-        configureAdvertising(isContactEventLoggingEnabled)
+        configureContactTracing(isContactEventLoggingEnabled)
 
 
     }

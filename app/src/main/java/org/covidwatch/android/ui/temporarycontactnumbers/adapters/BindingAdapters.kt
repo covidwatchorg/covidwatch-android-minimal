@@ -4,7 +4,7 @@ import android.text.format.DateUtils
 import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.databinding.BindingAdapter
-import com.google.android.gms.common.util.Base64Utils
+import android.util.Base64
 import java.util.*
 
 //  Created by Zsombor SZABO on 14/04/2020.
@@ -32,7 +32,7 @@ object BindingAdapters {
     fun bindTCNBytes(@NonNull textView: TextView, tcn: ByteArray?) {
         var result: CharSequence = ""
         if (tcn != null) {
-            result = Base64Utils.encode(tcn)
+            result = Base64.encodeToString(tcn, Base64.DEFAULT)
         }
         textView.text = result
     }
