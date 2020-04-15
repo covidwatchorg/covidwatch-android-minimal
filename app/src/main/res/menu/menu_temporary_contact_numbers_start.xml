@@ -3,15 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:title="@string/title_self_report"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_cloud_upload_black_24dp"
         android:id="@+id/self_report" />
 
     <item android:title="@string/title_clear"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_delete_black_24dp"
         android:id="@+id/clear" />
 
     <item android:title="@string/title_start_logging"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:id="@+id/start_logging" />
 
 </menu>
