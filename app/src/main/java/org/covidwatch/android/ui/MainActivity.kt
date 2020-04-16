@@ -1,5 +1,6 @@
 package org.covidwatch.android.ui
 
+import android.Manifest
 import android.Manifest.permission.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -44,6 +45,9 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        initBluetoothAdapter()
+        initLocationManager()
     }
 
     public override fun onResume() {

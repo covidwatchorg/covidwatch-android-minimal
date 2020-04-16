@@ -39,7 +39,7 @@ class CovidWatchApplication : Application() {
                 getString(R.string.preference_is_temporary_contact_number_logging_enabled) -> {
                     val isContactEventLoggingEnabled = sharedPreferences.getBoolean(
                         getString(R.string.preference_is_temporary_contact_number_logging_enabled),
-                        false
+                        true
                     )
                     configureContactTracing(isContactEventLoggingEnabled)
                 }
@@ -76,7 +76,7 @@ class CovidWatchApplication : Application() {
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         ).getBoolean(
             getString(R.string.preference_is_temporary_contact_number_logging_enabled),
-            false
+            true
         )
         configureContactTracing(isContactEventLoggingEnabled)
     }
