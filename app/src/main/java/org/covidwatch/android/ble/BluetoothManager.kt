@@ -32,6 +32,7 @@ class BluetoothManagerImpl(
     private val intent get() = Intent(app, TcnLifecycleService::class.java)
 
     private var service: TcnLifecycleService? = null
+    private var binded = false
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -40,9 +41,12 @@ class BluetoothManagerImpl(
                 setForegroundNotification(foregroundNotification())
                 startTcnBluetoothService()
             }
+            binded = true
         }
 
-        override fun onServiceDisconnected(name: ComponentName?) = Unit
+        override fun onServiceDisconnected(name: ComponentName?)  {
+            binded = false
+        }
     }
 
     private fun foregroundNotification(): Notification {
@@ -63,12 +67,14 @@ class BluetoothManagerImpl(
 
     override fun startService() {
         app.bindService(intent, serviceConnection, BIND_AUTO_CREATE)
-        app.startService(intent)
     }
 
     override fun stopService() {
-        service?.stopTcnBluetoothService()
-        app.stopService(intent)
+        if (binded) {
+            service?.stopTcnBluetoothService()
+            app.unbindService(serviceConnection)
+            binded = false
+        }
     }
 
     /**
