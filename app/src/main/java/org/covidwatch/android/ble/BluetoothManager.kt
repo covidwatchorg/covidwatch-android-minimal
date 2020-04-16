@@ -1,10 +1,6 @@
 package org.covidwatch.android.ble
 
-import android.app.Application
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.ComponentName
 import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
@@ -14,24 +10,20 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
-import org.covidwatch.android.data.TemporaryContactNumber
-import org.covidwatch.android.data.TemporaryContactNumberDAO
-import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.ui.MainActivity
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
 import org.tcncoalition.tcnclient.bluetooth.TcnLifecycleService
 import org.tcncoalition.tcnclient.bluetooth.TcnLifecycleService.LocalBinder
-import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
-import org.tcncoalition.tcnclient.toBytes
-import java.util.UUID
 
-interface BluetoothManager {
-    fun startService()
-    fun stopService()
+abstract class BluetoothManager {
+    open fun startService() {}
+    open fun stopService() {}
 }
 
 class BluetoothManagerImpl(
-    private val app: Application
-) : BluetoothManager {
+    private val app: Application,
+    val tcnBluetoothServiceCallback: TcnBluetoothServiceCallback
+) : BluetoothManager() {
 
     companion object {
         private const val CHANNEL_ID = "COVIDWatchContactTracingNotificationChannel"
@@ -44,21 +36,7 @@ class BluetoothManagerImpl(
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             this@BluetoothManagerImpl.service = (service as LocalBinder).service.apply {
-                setTcnCallback(
-                    object : TcnBluetoothServiceCallback {
-                        override fun generateTcn() = UUID.randomUUID().toBytes()
-
-                        override fun onTcnFound(tcn: ByteArray) {
-                            CovidWatchDatabase.databaseWriteExecutor.execute {
-                                val temporaryContactNumberDAO: TemporaryContactNumberDAO =
-                                    CovidWatchDatabase.getInstance(app).tempraryContactNumberDAO()
-                                val temporaryContactNumber = TemporaryContactNumber()
-                                temporaryContactNumber.bytes = tcn
-                                temporaryContactNumberDAO.insert(temporaryContactNumber)
-                            }
-                        }
-                    }
-                )
+                setTcnCallback(tcnBluetoothServiceCallback)
                 setForegroundNotification(foregroundNotification())
                 startTcnBluetoothService()
             }

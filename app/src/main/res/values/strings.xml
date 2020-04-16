@@ -18,6 +18,11 @@
     <string name="preference_is_current_user_sick">preference_is_current_user_sick</string>
     <string name="preference_is_temporary_contact_number_logging_enabled">preference_is_temporary_contact_number_logging_enabled</string>
     <string name="preference_last_temporary_contact_numbers_download_date">preference_last_temporary_contact_numbers_download_date</string>
+    <string name="preference_rak">preference_rak</string>
+    <string name="preference_tck">preference_tck</string>
+    <string name="preference_tck_index">preference_tck_index</string>
+    <string name="preference_tck_reportVerificationPublicKeyBytes">preference_tck_reportVerificationPublicKeyBytes</string>
+    <string name="preference_tck_bytes">preference_tck_bytes</string>
     <string name="channel_name">Channel Name</string>
     <string name="channel_description">Channel Description</string>
     <string name="notification_current_user_was_exposed">You have been notified</string>

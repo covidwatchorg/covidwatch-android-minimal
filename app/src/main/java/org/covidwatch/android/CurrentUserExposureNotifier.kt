@@ -9,17 +9,17 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Observer
 import org.covidwatch.android.data.CovidWatchDatabase
-import org.covidwatch.android.data.firestore.LocalContactEventsViewModel
+import org.covidwatch.android.data.firestore.TemporaryContactNumbersViewModel
 
 class CurrentUserExposureNotifier(var application: Application) {
 
-    private val viewModel: LocalContactEventsViewModel =
-        LocalContactEventsViewModel(
-            CovidWatchDatabase.getInstance(application).tempraryContactNumberDAO(),
+    private val viewModel: TemporaryContactNumbersViewModel =
+        TemporaryContactNumbersViewModel(
+            CovidWatchDatabase.getInstance(application).temporaryContactNumberDAO(),
             application
         )
 
-    fun startObservingLocalContactEvents() {
+    fun startObserving() {
 
         createNotificationChannel()
 

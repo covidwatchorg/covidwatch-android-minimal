@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import org.covidwatch.android.data.TemporaryContactNumber
 import org.covidwatch.android.data.TemporaryContactNumberDAO
 
-class LocalContactEventsViewModel(
+class TemporaryContactNumbersViewModel(
     temporaryContactNumberDAO: TemporaryContactNumberDAO,
     application: Application
 ) : AndroidViewModel(application) {

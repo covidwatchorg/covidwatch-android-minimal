@@ -21,7 +21,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.work.*
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
-import org.covidwatch.android.data.firestore.ContactEventsDownloadWorker
+import org.covidwatch.android.data.firestore.SignedReportsDownloadWorker
 
 class MainActivity : AppCompatActivity() {
 
@@ -88,12 +88,12 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         val downloadRequest =
-            OneTimeWorkRequestBuilder<ContactEventsDownloadWorker>()
+            OneTimeWorkRequestBuilder<SignedReportsDownloadWorker>()
                 .setConstraints(constraints)
                 .build()
 
         WorkManager.getInstance(this).enqueueUniqueWork(
-            ContactEventsDownloadWorker.WORKER_NAME,
+            SignedReportsDownloadWorker.WORKER_NAME,
             ExistingWorkPolicy.REPLACE,
             downloadRequest
         )

@@ -27,7 +27,7 @@ internal class CovidWatchRepository(application: Application) {
 
     init {
         val db = CovidWatchDatabase.getInstance(application)
-        temporaryContactNumberDAO = db.tempraryContactNumberDAO()
+        temporaryContactNumberDAO = db.temporaryContactNumberDAO()
         allEvents = temporaryContactNumberDAO.allSortedByDescTimestamp
     }
 }

@@ -21,6 +21,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
+import org.covidwatch.android.CovidWatchApplication
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
 import org.covidwatch.android.ui.temporarycontactnumbers.adapters.FragmentDataBindingComponent
@@ -45,7 +46,7 @@ class TemporaryContactNumbersFragment : Fragment() {
 
         val database = CovidWatchDatabase.getInstance(context)
         val viewModelTemporary: TemporaryContactNumbersViewModel by viewModels(factoryProducer = {
-            TemporaryContactNumbersViewModelFactory(database.tempraryContactNumberDAO(), context.applicationContext as Application)
+            TemporaryContactNumbersViewModelFactory(database.temporaryContactNumberDAO(), context.applicationContext as Application)
         })
         temporaryContactNumbersViewModel = viewModelTemporary
         vm = ViewModelProvider(this).get(BluetoothViewModel::class.java)
@@ -92,11 +93,11 @@ class TemporaryContactNumbersFragment : Fragment() {
                     builder.setMessage(R.string.message_dialog_self_report)
                     builder.apply {
                         setPositiveButton(getString(R.string.title_upload),
-                            DialogInterface.OnClickListener { dialog, id ->
-                                // TODO: Generate and upload report
+                            DialogInterface.OnClickListener { _, _ ->
+                                (activity?.application as? CovidWatchApplication)?.generateAndUploadReport()
                             })
                         setNegativeButton(getString(R.string.title_cancel),
-                            DialogInterface.OnClickListener { dialog, id ->
+                            DialogInterface.OnClickListener { _, _ ->
                                 // User cancelled the dialog
                             })
                     }
@@ -114,7 +115,7 @@ class TemporaryContactNumbersFragment : Fragment() {
                             DialogInterface.OnClickListener { dialog, id ->
                                 CovidWatchDatabase.databaseWriteExecutor.execute {
                                     val daoTemporary: TemporaryContactNumberDAO =
-                                        CovidWatchDatabase.getInstance(requireActivity()).tempraryContactNumberDAO()
+                                        CovidWatchDatabase.getInstance(requireActivity()).temporaryContactNumberDAO()
                                     daoTemporary.deleteAll()
                                 }
                             })
