@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">COVID Watch</string>
-    <string name="title_temporary_contact_numbers">Discovered RPIs</string>
+    <string name="title_temporary_contact_numbers">Discovered TCNs</string>
     <string name="title_my_profile">Settings</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_are_you_sick_question">Notify seen tags?</string>

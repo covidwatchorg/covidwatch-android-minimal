@@ -48,7 +48,10 @@ class TemporaryContactNumbersFragment : Fragment() {
 
         val database = CovidWatchDatabase.getInstance(context)
         val viewModelTemporary: TemporaryContactNumbersViewModel by viewModels(factoryProducer = {
-            TemporaryContactNumbersViewModelFactory(database.temporaryContactNumberDAO(), context.applicationContext as Application)
+            TemporaryContactNumbersViewModelFactory(
+                database.temporaryContactNumberDAO(),
+                context.applicationContext as Application
+            )
         })
         temporaryContactNumbersViewModel = viewModelTemporary
         vm = ViewModelProvider(this).get(BluetoothViewModel::class.java)
@@ -76,7 +79,9 @@ class TemporaryContactNumbersFragment : Fragment() {
             }, TimeUnit.SECONDS.toMillis(1))
         }
 
-        viewModelTemporary.temporaryContactEvents.observe(viewLifecycleOwner, Observer { adapter.submitList(it) })
+        viewModelTemporary.temporaryContactEvents.observe(
+            viewLifecycleOwner,
+            Observer { adapter.submitList(it) })
 
         setHasOptionsMenu(true)
 
@@ -84,13 +89,7 @@ class TemporaryContactNumbersFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        val isContactEventLoggingEnabled =
-            temporaryContactNumbersViewModel.isContactEventLoggingEnabled.value ?: false
-        if (isContactEventLoggingEnabled) {
-            inflater.inflate(R.menu.menu_temporary_contact_numbers_stop, menu)
-        } else {
-            inflater.inflate(R.menu.menu_temporary_contact_numbers_start, menu)
-        }
+        inflater.inflate(R.menu.menu_temporary_contact_numbers, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -114,39 +113,6 @@ class TemporaryContactNumbersFragment : Fragment() {
                     builder.create()
                 }
                 alertDialog?.show()
-            }
-            R.id.clear -> {
-                val alertDialog: AlertDialog? = activity?.let {
-                    val builder = AlertDialog.Builder(it)
-                    builder.setMessage(R.string.title_dialog_clear)
-                    builder.apply {
-                        setPositiveButton(getString(R.string.title_clear),
-                            DialogInterface.OnClickListener { dialog, id ->
-                                CovidWatchDatabase.databaseWriteExecutor.execute {
-                                    val daoTemporary: TemporaryContactNumberDAO =
-                                        CovidWatchDatabase.getInstance(requireActivity()).temporaryContactNumberDAO()
-                                    daoTemporary.deleteAll()
-                                }
-                            })
-                        setNegativeButton(getString(R.string.title_cancel),
-                            DialogInterface.OnClickListener { dialog, id ->
-                                // User cancelled the dialog
-                            })
-                    }
-                    // Create the AlertDialog
-                    builder.create()
-                }
-                alertDialog?.show()
-            }
-            R.id.start_logging -> {
-                initLocationManager()
-                initBluetoothAdapter()
-                setContactEventLogging(true)
-                activity?.invalidateOptionsMenu()
-            }
-            R.id.stop_logging -> {
-                setContactEventLogging(false)
-                activity?.invalidateOptionsMenu()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -174,7 +140,8 @@ class TemporaryContactNumbersFragment : Fragment() {
      * The user will be asked to enable bluetooth if it is turned off
      */
     private fun initBluetoothAdapter() {
-        val bluetoothAdapter = (activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        val bluetoothAdapter =
+            (activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
         if (!bluetoothAdapter.isEnabled) {
@@ -197,13 +164,16 @@ class TemporaryContactNumbersFragment : Fragment() {
                 activity,
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
-            when (permissionStatus){
+            when (permissionStatus) {
                 PackageManager.PERMISSION_GRANTED -> vm.permissionRequestResultLiveData.value = true
                 PackageManager.PERMISSION_DENIED -> {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(
+                            activity,
                             Manifest.permission.ACCESS_FINE_LOCATION
-                        )){
-                        Toast.makeText(activity,
+                        )
+                    ) {
+                        Toast.makeText(
+                            activity,
                             getString(R.string.ble_location_permission),
                             Toast.LENGTH_SHORT
                         ).show()
@@ -225,14 +195,15 @@ class TemporaryContactNumbersFragment : Fragment() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        when (requestCode){
+        when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     setContactEventLogging(true)
                     vm.permissionRequestResultLiveData.value = true
                 }
             }
-            else -> {}//Ignore all other requests
+            else -> {
+            }//Ignore all other requests
         }
     }
 }
