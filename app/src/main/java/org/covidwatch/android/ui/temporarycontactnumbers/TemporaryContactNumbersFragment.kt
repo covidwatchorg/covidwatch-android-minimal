@@ -9,6 +9,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -28,6 +29,7 @@ import org.covidwatch.android.ui.temporarycontactnumbers.adapters.FragmentDataBi
 import org.covidwatch.android.data.TemporaryContactNumberDAO
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.databinding.FragmentTemporaryContactNumbersBinding
+import java.util.concurrent.TimeUnit
 
 
 class TemporaryContactNumbersFragment : Fragment() {
@@ -67,6 +69,13 @@ class TemporaryContactNumbersFragment : Fragment() {
         binding.temporaryContactNumbersRecyclerview.addItemDecoration(
             DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
         )
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            (activity?.application as? CovidWatchApplication)?.refreshOneTime()
+            Handler().postDelayed({
+                binding.swipeRefreshLayout.isRefreshing = false
+            }, TimeUnit.SECONDS.toMillis(1))
+        }
+
         viewModelTemporary.temporaryContactEvents.observe(viewLifecycleOwner, Observer { adapter.submitList(it) })
 
         setHasOptionsMenu(true)

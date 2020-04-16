@@ -19,6 +19,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.work.*
+import org.covidwatch.android.CovidWatchApplication
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
 import org.covidwatch.android.data.firestore.SignedReportsDownloadWorker
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-        refreshPublicContactEvents()
+        (application as? CovidWatchApplication)?.refreshOneTime()
     }
 
     public fun addDummyCEN() {
@@ -80,25 +81,6 @@ class MainActivity : AppCompatActivity() {
             commit()
         }
     }
-
-    private fun refreshPublicContactEvents() {
-        val constraints = Constraints.Builder()
-            .setRequiresCharging(false)
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
-        val downloadRequest =
-            OneTimeWorkRequestBuilder<SignedReportsDownloadWorker>()
-                .setConstraints(constraints)
-                .build()
-
-        WorkManager.getInstance(this).enqueueUniqueWork(
-            SignedReportsDownloadWorker.WORKER_NAME,
-            ExistingWorkPolicy.REPLACE,
-            downloadRequest
-        )
-    }
-
 
     /**
      * Initializes the BluetoothAdapter. Manifest file is already setup to allow bluetooth access.

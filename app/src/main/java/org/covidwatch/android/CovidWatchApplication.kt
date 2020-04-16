@@ -4,11 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import cafe.cryptography.ed25519.Ed25519PrivateKey
 import org.covidwatch.android.ble.BluetoothManagerImpl
 import org.covidwatch.android.data.CovidWatchDatabase
@@ -83,6 +79,24 @@ class CovidWatchApplication : Application() {
             false
         )
         configureContactTracing(isContactEventLoggingEnabled)
+    }
+
+    fun refreshOneTime() {
+        val constraints = Constraints.Builder()
+            .setRequiresCharging(false)
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val downloadRequest =
+            OneTimeWorkRequestBuilder<SignedReportsDownloadWorker>()
+                .setConstraints(constraints)
+                .build()
+
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            SignedReportsDownloadWorker.WORKER_NAME,
+            ExistingWorkPolicy.REPLACE,
+            downloadRequest
+        )
     }
 
     private fun schedulePeriodicRefresh() {
