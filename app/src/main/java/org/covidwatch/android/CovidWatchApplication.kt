@@ -69,8 +69,8 @@ class CovidWatchApplication : Application() {
 
         schedulePeriodicRefresh()
 
-        currentUserExposureNotifier = CurrentUserExposureNotifier(this)
-        currentUserExposureNotifier.startObserving()
+//        currentUserExposureNotifier = CurrentUserExposureNotifier(this)
+//        currentUserExposureNotifier.startObserving()
 
         val isContactEventLoggingEnabled = getSharedPreferences(
             getString(R.string.preference_file_key), Context.MODE_PRIVATE

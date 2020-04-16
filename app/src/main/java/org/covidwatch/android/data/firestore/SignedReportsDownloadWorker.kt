@@ -16,6 +16,7 @@ import org.covidwatch.android.data.CovidWatchDatabase
 import org.tcncoalition.tcnclient.crypto.Report
 import cafe.cryptography.ed25519.Ed25519PublicKey
 import cafe.cryptography.ed25519.Ed25519Signature
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Blob
 import org.tcncoalition.tcnclient.crypto.KeyIndex
 import org.tcncoalition.tcnclient.crypto.MemoType
@@ -52,10 +53,10 @@ class SignedReportsDownloadWorker(var context: Context, workerParams: WorkerPara
 
         val task =
             FirebaseFirestore.getInstance().collection(FirestoreConstants.COLLECTION_SIGNED_REPORTS)
-//                .whereGreaterThan(
-//                    FirestoreConstants.FIELD_TIMESTAMP,
-//                    Timestamp(Date(fetchSinceTime))
-//                )
+                .whereGreaterThan(
+                    FirestoreConstants.FIELD_TIMESTAMP,
+                    Timestamp(Date(fetchSinceTime))
+                )
                 .get()
                 .continueWith(
                     CovidWatchDatabase.databaseWriteExecutor,
