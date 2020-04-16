@@ -66,14 +66,11 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.2.4'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation "androidx.work:work-runtime-ktx:2.3.4"
-    implementation("com.google.firebase:firebase-firestore-ktx:21.4.2") {
-        exclude group: "com.google.protobuf", module: "protobuf-lite"
-        exclude group: "com.google.firebase", module: "protolite-well-known-types"
-    }
+    implementation "com.google.firebase:firebase-firestore-ktx:21.4.2"
     implementation 'com.google.guava:guava:28.2-jre'
 //    implementation 'com.github.TCNCoalition:tcn-client-android:0.0.1'
     implementation project(":tcn-client-android:tcn-client-android")
-    implementation 'com.google.protobuf:protobuf-javalite:3.11.1'
+
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
