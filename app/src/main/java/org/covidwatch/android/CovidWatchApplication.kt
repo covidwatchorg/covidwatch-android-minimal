@@ -132,7 +132,10 @@ class CovidWatchApplication : Application() {
         }
 
         override fun onTcnFound(tcn: ByteArray) {
-            logTcn(tcn)
+            // TODO: Check comparison with previous TCN also
+            if (!tcn.contentEquals(currentTemporaryContactKey.temporaryContactNumber.bytes)) {
+                logTcn(tcn)
+            }
         }
     }
 

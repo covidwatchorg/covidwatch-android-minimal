@@ -15,9 +15,11 @@ import org.covidwatch.android.data.TemporaryContactNumberDAO
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.tcncoalition.tcnclient.crypto.Report
 import cafe.cryptography.ed25519.Ed25519PublicKey
+import cafe.cryptography.ed25519.Ed25519Signature
 import com.google.firebase.firestore.Blob
 import org.tcncoalition.tcnclient.crypto.KeyIndex
 import org.tcncoalition.tcnclient.crypto.MemoType
+import org.tcncoalition.tcnclient.crypto.SignedReport
 import java.util.*
 
 class SignedReportsDownloadWorker(var context: Context, workerParams: WorkerParameters) :
@@ -136,16 +138,16 @@ class SignedReportsDownloadWorker(var context: Context, workerParams: WorkerPara
                 memoData
             )
 
-//            val signedReport = SignedReport(report, Ed25519Signature.fromByteArray(signatureBytes))
+            val signedReport = SignedReport(report, Ed25519Signature.fromByteArray(signatureBytes))
             val signatureBase64EncodedString = Base64.encodeToString(signatureBytes, Base64.DEFAULT)
 
-//            try {
-//                signedReport.verify()
-//                Log.i(TAG, "Source integrity verification for signed report ($signatureBase64EncodedString) succeeded")
-//            } catch (exception: Exception) {
-//                Log.e(TAG, "Source integrity verification for signed report ($signatureBase64EncodedString) failed")
-//                return@forEach
-//            }
+            try {
+                signedReport.verify()
+                Log.i(TAG, "Source integrity verification for signed report ($signatureBase64EncodedString) succeeded")
+            } catch (exception: Exception) {
+                Log.e(TAG, "Source integrity verification for signed report ($signatureBase64EncodedString) failed")
+                return@forEach
+            }
 
             val recomputedTemporaryContactNumbers = report.temporaryContactNumbers
             val identifiers = mutableListOf<ByteArray>()
