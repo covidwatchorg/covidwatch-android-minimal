@@ -1,20 +1,12 @@
 package org.covidwatch.android.ui.temporarycontactnumbers
 
-import android.Manifest
 import android.app.Application
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingComponent
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -26,7 +18,6 @@ import org.covidwatch.android.CovidWatchApplication
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
 import org.covidwatch.android.ui.temporarycontactnumbers.adapters.FragmentDataBindingComponent
-import org.covidwatch.android.data.TemporaryContactNumberDAO
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.databinding.FragmentTemporaryContactNumbersBinding
 import java.util.concurrent.TimeUnit
@@ -38,6 +29,7 @@ class TemporaryContactNumbersFragment : Fragment() {
     private lateinit var vm: BluetoothViewModel
     private lateinit var binding: FragmentTemporaryContactNumbersBinding
     private var dataBindingComponent: DataBindingComponent = FragmentDataBindingComponent(this)
+    private var hasAlreadyNotified = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,6 +75,27 @@ class TemporaryContactNumbersFragment : Fragment() {
             viewLifecycleOwner,
             Observer { adapter.submitList(it) })
 
+        viewModelTemporary.firstExposedTemporaryContactNumber.observe(
+            viewLifecycleOwner,
+            Observer {
+                if (it != null && !hasAlreadyNotified) {
+                    val activity = activity ?: return@Observer
+                    hasAlreadyNotified = true
+                    val alertDialog: AlertDialog? = activity.let {
+                        val builder = AlertDialog.Builder(activity)
+                        builder.setMessage(R.string.notification_current_user_was_exposed)
+                        builder.apply {
+                            setPositiveButton(getString(R.string.title_ok),
+                                DialogInterface.OnClickListener { _, _ ->
+                                })
+                        }
+                        // Create the AlertDialog
+                        builder.create()
+                    }
+                    alertDialog?.show()
+                }
+            })
+
         setHasOptionsMenu(true)
 
         return binding.root
@@ -95,7 +108,26 @@ class TemporaryContactNumbersFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.self_report -> {
+            R.id.download_self_reports -> {
+                val alertDialog: AlertDialog? = activity?.let {
+                    val builder = AlertDialog.Builder(it)
+                    builder.setMessage(R.string.message_download_self_reports)
+                    builder.apply {
+                        setPositiveButton(getString(R.string.title_download),
+                            DialogInterface.OnClickListener { _, _ ->
+                                (activity?.application as? CovidWatchApplication)?.refreshOneTime()
+                            })
+                        setNegativeButton(getString(R.string.title_cancel),
+                            DialogInterface.OnClickListener { _, _ ->
+                                // User cancelled the dialog
+                            })
+                    }
+                    // Create the AlertDialog
+                    builder.create()
+                }
+                alertDialog?.show()
+            }
+            R.id.upload_self_report -> {
                 val alertDialog: AlertDialog? = activity?.let {
                     val builder = AlertDialog.Builder(it)
                     builder.setMessage(R.string.message_dialog_self_report)

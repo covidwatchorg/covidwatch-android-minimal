@@ -2,9 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:title="@string/title_download_self_reports"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_cloud_download_black_24dp"
+        android:id="@+id/download_self_reports" />
+
     <item android:title="@string/title_self_report"
         app:showAsAction="always"
         android:icon="@drawable/ic_cloud_upload_black_24dp"
-        android:id="@+id/self_report" />
+        android:id="@+id/upload_self_report" />
 
 </menu>

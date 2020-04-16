@@ -18,6 +18,9 @@ interface TemporaryContactNumberDAO {
     @Query("SELECT * FROM temporary_contact_numbers WHERE bytes = :identifier")
     fun findByPrimaryKey(identifier: String): TemporaryContactNumber
 
+    @Query("SELECT * FROM temporary_contact_numbers WHERE was_potentially_infectious = '1' LIMIT 1")
+    fun findFirstPotentiallyInfections(): LiveData<TemporaryContactNumber>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(temporaryContactNumber: TemporaryContactNumber)
 

@@ -6,8 +6,13 @@
     <string name="title_are_you_sick_question">Notify seen tags?</string>
     <string name="title_yes">Yes</string>
     <string name="title_no">No</string>
-    <string name="title_self_report">Self-report</string>
+    <string name="title_download">Download</string>
+    <string name="title_download_self_reports">Download self-reports</string>
+    <string name="message_download_self_reports">Download self-reports from the cloud?</string>
+    <string name="title_self_report">Upload self-report</string>
+    <string name="message_self_report">Upload self-report to the cloud?</string>
     <string name="title_clear">Clear</string>
+    <string name="title_ok">Ok</string>
     <string name="title_dialog_clear">Clear discovered rolling proximity identifiers (RPI) stored on this device?</string>
     <string name="message_dialog_self_report">Upload self-report to the cloud?</string>
     <string name="title_start_logging">Start</string>
@@ -25,7 +30,7 @@
     <string name="preference_tck_bytes">preference_tck_bytes</string>
     <string name="channel_name">Channel Name</string>
     <string name="channel_description">Channel Description</string>
-    <string name="notification_current_user_was_exposed">You have been notified</string>
+    <string name="notification_current_user_was_exposed">You have been possibly exposed to someone who you have recently been in contact with, and who has subsequently self-reported as having the virus.</string>
 
     <!--  FROM THE UX REPO  -->
     <string name="splash_text">Help your community stay safe, anonymously.</string>

@@ -16,6 +16,8 @@ class TemporaryContactNumbersViewModel(temporaryContactNumberDAO: TemporaryConta
     val temporaryContactEvents: LiveData<PagedList<TemporaryContactNumber>> =
         temporaryContactNumberDAO.pagedAllSortedByDescTimestamp.toLiveData(pageSize = 50)
 
+    val firstExposedTemporaryContactNumber = temporaryContactNumberDAO.findFirstPotentiallyInfections()
+
     var isContactEventLoggingEnabled = MutableLiveData<Boolean>().apply {
         val isEnabled = application.getSharedPreferences(
             application.getString(R.string.preference_file_key),

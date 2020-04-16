@@ -32,7 +32,7 @@ object BindingAdapters {
     fun bindTCNBytes(@NonNull textView: TextView, tcn: ByteArray?) {
         var result: CharSequence = ""
         if (tcn != null) {
-            result = Base64.encodeToString(tcn, Base64.DEFAULT)
+            result = Base64.encodeToString(tcn, Base64.NO_WRAP)
         }
         textView.text = result
     }
