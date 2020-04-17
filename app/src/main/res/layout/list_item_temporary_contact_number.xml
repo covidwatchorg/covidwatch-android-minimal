@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="temporaryContactNumber"
             type="org.covidwatch.android.data.TemporaryContactNumber" />
     </data>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
-        android:gravity="center_vertical|left"
+        android:background="@{temporaryContactNumber.wasPotentiallyInfectious ? @color/colorIsCurrentUserSick : @color/colorIsCurrentUserNotSick }"
+        android:gravity="center_vertical|start"
         android:orientation="vertical"
         android:paddingHorizontal="@dimen/activity_horizontal_margin"
-        android:paddingVertical="@dimen/activity_vertical_margin"
-        android:background="@{temporaryContactNumber.wasPotentiallyInfectious ? @color/colorIsCurrentUserSick : @color/colorIsCurrentUserNotSick }"
-        tools:ignore="RtlHardcoded">
+        android:paddingVertical="@dimen/activity_vertical_margin">
 
         <TextView
             android:layout_width="wrap_content"
@@ -37,8 +35,5 @@
             android:textColor="@android:color/primary_text_light"
             app:bindTCNBytes="@{temporaryContactNumber.bytes}"
             tools:text="Subtitle" />
-
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
+    </LinearLayout>
 </layout>

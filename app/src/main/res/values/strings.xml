@@ -1,89 +1,26 @@
 <resources>
     <string name="app_name">COVID Watch</string>
-    <string name="title_temporary_contact_numbers">Discovered TCNs</string>
-    <string name="title_my_profile">Settings</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="title_are_you_sick_question">Notify seen tags?</string>
-    <string name="title_yes">Yes</string>
-    <string name="title_no">No</string>
     <string name="title_download">Download</string>
     <string name="title_download_self_reports">Download self-reports</string>
     <string name="message_download_self_reports">Download self-reports from the cloud?</string>
     <string name="title_self_report">Upload self-report</string>
-    <string name="message_self_report">Upload self-report to the cloud?</string>
-    <string name="title_clear">Clear</string>
     <string name="title_ok">Ok</string>
-    <string name="title_dialog_clear">Clear discovered rolling proximity identifiers (RPI) stored on this device?</string>
     <string name="message_dialog_self_report">Upload self-report to the cloud?</string>
-    <string name="title_start_logging">Start</string>
-    <string name="title_stop_logging">Stop</string>
     <string name="title_upload">Upload</string>
     <string name="title_cancel">Cancel</string>
     <string name="preference_file_key">org.covidwatch.android.PREFERENCE_FILE_KEY</string>
     <string name="preference_is_current_user_sick">preference_is_current_user_sick</string>
     <string name="preference_is_temporary_contact_number_logging_enabled">preference_is_temporary_contact_number_logging_enabled</string>
     <string name="preference_last_temporary_contact_numbers_download_date">preference_last_temporary_contact_numbers_download_date</string>
-    <string name="preference_rak">preference_rak</string>
-    <string name="preference_tck">preference_tck</string>
-    <string name="preference_tck_index">preference_tck_index</string>
-    <string name="preference_tck_reportVerificationPublicKeyBytes">preference_tck_reportVerificationPublicKeyBytes</string>
-    <string name="preference_tck_bytes">preference_tck_bytes</string>
     <string name="channel_name">Channel Name</string>
     <string name="channel_description">Channel Description</string>
     <string name="notification_current_user_was_exposed">You have been possibly exposed to someone who you have recently been in contact with, and who has subsequently self-reported as having the virus.</string>
 
     <!--  FROM THE UX REPO  -->
-    <string name="splash_text">Help your community stay safe, anonymously.</string>
-    <string name="splash_start_button">Start</string>
 
-    <string name="onboarding_button">Let\'s do this!</string>
-    <string name="onboarding_steps">Protect your privacy and your community with just 3 steps.</string>
-    <string name="onboarding_step1">Turn on Bluetooth.</string>
-    <string name="onboarding_step2">Allow us to send you Push notifications to warn you of potential contact.</string>
-    <string name="onboarding_share">Share</string>
-
-    <string name="share_subj">Secure COVID-19 contact alert app</string>
-    <string name="share_body">I found this privacy-aware COVID-19 app that doesn\'t upload any information.</string>
-
-    <string name="date">Date</string>
-    <string name="datepicker">datePicker</string>
-    <string name="textView" />
-    <string name="disclaimer"><![CDATA[By clicking Report, you acknowledge, understand and further agree to our Privacy Policy and Terms & Conditions]]></string>
     <string name="ble_location_permission">The permission to get BLE location data is required</string>
     <string name="foreground_notification_title">Privacy-preserving contact tracing is enabled</string>
-    <string name="not_contacted">You have NOT been contacted.</string>
-    <string name="based_on">Based on last 14 days of activity.</string>
-    <string name="we_dont_share">We don\'t share with Big Brother.</string>
-    <string name="we_dont_share_2">We share with each other.</string>
-    <string name="share_text">Share this app</string>
-    <string name="share_sub_text">Ask family and friends to join the COVID Watch Team</string>
-    <string name="self_report">Self Report</string>
-    <string name="self_report_text">Self Report</string>
 
     <!-- Test Flow -->
-    <string name="question_text">Have you been tested for COVID-19?</string>
-    <string name="question_date">When did your symptoms start?</string>
-    <string name="not_yet_tested">Not yet tested</string>
-    <string name="tested_positive">Tested positive</string>
-    <string name="tested_negative">Tested negative</string>
-    <string name="report">Report</string>
-    <string name="bluetooth_explanation_subtext">This is required for the app to work.</string>
-    <string name="bluetooth_explanation_text">We use Bluetooth to anonymously log interactions with other Covid Watch users. Your personal data is always private and never shared.</string>
-    <string name="bluetooth_explanation_title">Privately Connect</string>
-    <string name="logo_image_content_descriptor">Logo image</string>
-    <string name="menu_button_content_descriptor">Menu button</string>
-    <string name="people_bluetooth_connection_content_descriptor">People connecting over bluetooth</string>
-    <string name="female_superhero_content_descriptor">Female superhero</string>
-    <string name="share_the_app">Share the app</string>
-    <string name="text_for_covid_text">Tested for COVID-19?</string>
-    <string name="you_re_all_set_title">You’re all set!</string>
-    <string name="thank_you_text">Thank you for helping protect your communities. You will be notified of potential contact to COVID-19..</string>
-    <string name="welcome_back_title">Welcome Back!</string>
-    <string name="not_detected_text">Covid Watch has not detected exposure to COVID-19. Share the app with family and friends to help your community stay safe.</string>
-    <string name="detected_thank_you_text">Thank you for helping your community stay safe, anonymously.</string>
-    <string name="main_subtext_1">It works best when everyone uses it.</string>
-    <string name="main_subtext_2">Share your result anonymously to help your community stay safe.</string>
-    <string name="contact_alert_text">You may have been in contact with COVID-19</string>
-    <string name="share_intent_text">Help your community stay safe, anonymously:</string>
 
 </resources>
