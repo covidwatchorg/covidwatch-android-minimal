@@ -1,6 +1,10 @@
 package org.covidwatch.android.ble
 
-import android.app.*
+import android.app.Application
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
@@ -11,9 +15,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
 import org.covidwatch.android.ui.MainActivity
-import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService.LocalBinder
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
 
 abstract class BluetoothManager {
     open fun startService() {}
@@ -25,26 +29,19 @@ class BluetoothManagerImpl(
     val tcnBluetoothServiceCallback: TcnBluetoothServiceCallback
 ) : BluetoothManager() {
 
-    companion object {
-        private const val CHANNEL_ID = "COVIDWatchContactTracingNotificationChannel"
-    }
-
-    private val intent get() = Intent(app, TcnBluetoothService::class.java)
-
     private var service: TcnBluetoothService? = null
     private var binded = false
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             this@BluetoothManagerImpl.service = (service as LocalBinder).service.apply {
-                setTcnCallback(tcnBluetoothServiceCallback)
                 setForegroundNotification(foregroundNotification())
-                startTcnBluetoothService()
+                startTcnExchange(tcnBluetoothServiceCallback)
             }
             binded = true
         }
 
-        override fun onServiceDisconnected(name: ComponentName?)  {
+        override fun onServiceDisconnected(name: ComponentName?) {
             binded = false
         }
     }
@@ -54,7 +51,10 @@ class BluetoothManagerImpl(
 
         val notificationIntent = Intent(app, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            app, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            app,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         return NotificationCompat.Builder(app, CHANNEL_ID)
@@ -66,12 +66,16 @@ class BluetoothManagerImpl(
     }
 
     override fun startService() {
-        app.bindService(intent, serviceConnection, BIND_AUTO_CREATE)
+        app.bindService(
+            Intent(app, TcnBluetoothService::class.java),
+            serviceConnection,
+            BIND_AUTO_CREATE
+        )
     }
 
     override fun stopService() {
         if (binded) {
-            service?.stopTcnBluetoothService()
+            service?.stopTcnExchange()
             app.unbindService(serviceConnection)
             binded = false
         }
@@ -94,5 +98,9 @@ class BluetoothManagerImpl(
             )
             manager?.createNotificationChannel(serviceChannel)
         }
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "COVIDWatchContactTracingNotificationChannel"
     }
 }
