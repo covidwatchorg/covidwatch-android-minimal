@@ -12,8 +12,8 @@ import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
 import org.covidwatch.android.ui.MainActivity
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
-import org.tcncoalition.tcnclient.bluetooth.TcnLifecycleService
-import org.tcncoalition.tcnclient.bluetooth.TcnLifecycleService.LocalBinder
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService.LocalBinder
 
 abstract class BluetoothManager {
     open fun startService() {}
@@ -29,9 +29,9 @@ class BluetoothManagerImpl(
         private const val CHANNEL_ID = "COVIDWatchContactTracingNotificationChannel"
     }
 
-    private val intent get() = Intent(app, TcnLifecycleService::class.java)
+    private val intent get() = Intent(app, TcnBluetoothService::class.java)
 
-    private var service: TcnLifecycleService? = null
+    private var service: TcnBluetoothService? = null
     private var binded = false
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
