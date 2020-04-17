@@ -16,11 +16,9 @@
     <string name="channel_description">Channel Description</string>
     <string name="notification_current_user_was_exposed">You have been possibly exposed to someone who you have recently been in contact with, and who has subsequently self-reported as having the virus.</string>
 
-    <!--  FROM THE UX REPO  -->
 
     <string name="ble_location_permission">The permission to get BLE location data is required</string>
     <string name="foreground_notification_title">Privacy-preserving contact tracing is enabled</string>
-
-    <!-- Test Flow -->
+    <string name="foreground_notification_ble_off">Bluetooth is off. COVID Watch needs it to function propertly</string>
 
 </resources>

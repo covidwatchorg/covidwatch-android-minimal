@@ -1,11 +1,11 @@
 package org.covidwatch.android.ble
 
-import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
+import android.content.Context
 import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
 import android.content.ServiceConnection
@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
 import org.covidwatch.android.ui.MainActivity
+import org.tcncoalition.tcnclient.bluetooth.BluetoothStateListener
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService.LocalBinder
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
@@ -25,9 +26,9 @@ abstract class BluetoothManager {
 }
 
 class BluetoothManagerImpl(
-    private val app: Application,
+    private val context: Context,
     val tcnBluetoothServiceCallback: TcnBluetoothServiceCallback
-) : BluetoothManager() {
+) : BluetoothManager(), BluetoothStateListener {
 
     private var service: TcnBluetoothService? = null
     private var binded = false
@@ -35,7 +36,11 @@ class BluetoothManagerImpl(
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             this@BluetoothManagerImpl.service = (service as LocalBinder).service.apply {
-                setForegroundNotification(foregroundNotification())
+                val notification = foregroundNotification(
+                    context.getString(R.string.foreground_notification_title)
+                )
+                setForegroundNotification(NOTIFICATION_ID, notification)
+                setBluetoothStateListener(this@BluetoothManagerImpl)
                 startTcnExchange(tcnBluetoothServiceCallback)
             }
             binded = true
@@ -46,19 +51,19 @@ class BluetoothManagerImpl(
         }
     }
 
-    private fun foregroundNotification(): Notification {
+    private fun foregroundNotification(title: String): Notification {
         createNotificationChannelIfNeeded()
 
-        val notificationIntent = Intent(app, MainActivity::class.java)
+        val notificationIntent = Intent(context, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            app,
+            context,
             0,
             notificationIntent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        return NotificationCompat.Builder(app, CHANNEL_ID)
-            .setContentTitle(app.getString(R.string.foreground_notification_title))
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setContentTitle(title)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setCategory(Notification.CATEGORY_SERVICE)
@@ -66,8 +71,8 @@ class BluetoothManagerImpl(
     }
 
     override fun startService() {
-        app.bindService(
-            Intent(app, TcnBluetoothService::class.java),
+        context.bindService(
+            Intent(context, TcnBluetoothService::class.java),
             serviceConnection,
             BIND_AUTO_CREATE
         )
@@ -76,7 +81,7 @@ class BluetoothManagerImpl(
     override fun stopService() {
         if (binded) {
             service?.stopTcnExchange()
-            app.unbindService(serviceConnection)
+            context.unbindService(serviceConnection)
             binded = false
         }
     }
@@ -94,7 +99,7 @@ class BluetoothManagerImpl(
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             val manager = getSystemService(
-                app, NotificationManager::class.java
+                context, NotificationManager::class.java
             )
             manager?.createNotificationChannel(serviceChannel)
         }
@@ -102,5 +107,22 @@ class BluetoothManagerImpl(
 
     companion object {
         private const val CHANNEL_ID = "COVIDWatchContactTracingNotificationChannel"
+        const val NOTIFICATION_ID = 42
+    }
+
+    override fun bluetoothStateChanged(bluetoothOn: Boolean) {
+        val title = if (bluetoothOn) {
+            R.string.foreground_notification_title
+        } else {
+            R.string.foreground_notification_ble_off
+        }
+
+        getSystemService(
+            context,
+            NotificationManager::class.java
+        )?.notify(
+            NOTIFICATION_ID,
+            foregroundNotification(context.getString(title))
+        )
     }
 }
