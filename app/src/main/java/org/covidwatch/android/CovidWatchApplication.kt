@@ -3,7 +3,13 @@ package org.covidwatch.android
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import org.covidwatch.android.ble.BluetoothManagerImpl
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.data.SignedReport
@@ -17,13 +23,8 @@ import java.util.concurrent.TimeUnit
 
 class CovidWatchApplication : Application() {
 
-    companion object {
-        private const val TAG = "COVIDWatchApplication"
-    }
-
     private val tcnKeys = TcnKeys(this)
     private lateinit var signedReportsUploader: SignedReportsUploader
-    private lateinit var currentUserExposureNotifier: CurrentUserExposureNotifier
 
     //TODO: Move to DI module
     private var bluetoothManager: BluetoothManagerImpl? = null
@@ -63,9 +64,6 @@ class CovidWatchApplication : Application() {
         signedReportsUploader.startUploading()
 
         schedulePeriodicRefresh()
-
-//        currentUserExposureNotifier = CurrentUserExposureNotifier(this)
-//        currentUserExposureNotifier.startObserving()
 
         val isContactEventLoggingEnabled = getSharedPreferences(
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
