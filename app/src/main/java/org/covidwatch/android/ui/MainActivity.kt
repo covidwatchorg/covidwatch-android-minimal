@@ -1,7 +1,7 @@
 package org.covidwatch.android.ui
 
-import android.Manifest
-import android.Manifest.permission.*
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -9,21 +9,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.work.*
 import org.covidwatch.android.CovidWatchApplication
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
-import org.covidwatch.android.data.firestore.SignedReportsDownloadWorker
 
 class MainActivity : AppCompatActivity() {
 
@@ -45,15 +39,16 @@ class MainActivity : AppCompatActivity() {
         (application as? CovidWatchApplication)?.refreshOneTime()
     }
 
-    private fun setContactEventLogging(enabled: Boolean) {
-        val application = this?.applicationContext ?: return
-        val sharedPref = application.getSharedPreferences(
-            application.getString(R.string.preference_file_key), Context.MODE_PRIVATE
+    private fun startContactEventLogging() {
+        val sharedPref = getSharedPreferences(
+            getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
         ) ?: return
+
         with(sharedPref.edit()) {
             putBoolean(
-                application.getString(org.covidwatch.android.R.string.preference_is_temporary_contact_number_logging_enabled),
-                enabled
+                getString(R.string.preference_is_temporary_contact_number_logging_enabled),
+                true
             )
             commit()
         }
@@ -80,23 +75,29 @@ class MainActivity : AppCompatActivity() {
      * TODO add GPS initialization here, for now we just ask for location permissions
      */
     private val LOCATION_REQUEST_CODE = 1
-    fun initLocationManager() {
+    private fun initLocationManager() {
         runOnUiThread {
             val permissionStatus = ContextCompat.checkSelfPermission(
                 this,
                 ACCESS_FINE_LOCATION
             )
-            when (permissionStatus){
+
+            when (permissionStatus) {
                 PackageManager.PERMISSION_GRANTED -> vm.permissionRequestResultLiveData.value = true
                 PackageManager.PERMISSION_DENIED -> {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(this,ACCESS_FINE_LOCATION)){
-                        Toast.makeText(this,
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(
+                            this,
+                            ACCESS_FINE_LOCATION
+                        )
+                    ) {
+                        Toast.makeText(
+                            this,
                             getString(R.string.ble_location_permission),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                     //TODO: If a user selects "Don't ask again" the function below does not show the system dialogue.  This prevents the user from ever progressing. Maybe this is an OK UX?
-                    val permissions = arrayOf(ACCESS_COARSE_LOCATION,ACCESS_FINE_LOCATION,ACCESS_BACKGROUND_LOCATION)
+                    val permissions = arrayOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
                     ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE)
                 }
             }
@@ -108,14 +109,15 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        when (requestCode){
+        when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    setContactEventLogging(true)
+                    startContactEventLogging()
                     vm.permissionRequestResultLiveData.value = true
                 }
             }
-            else -> {}//Ignore all other requests
+            else -> {
+            }//Ignore all other requests
         }
     }
 }
