@@ -18,14 +18,14 @@
         android:gravity="center_vertical|start"
         android:orientation="vertical"
         android:paddingHorizontal="@dimen/activity_horizontal_margin"
-        android:paddingVertical="@dimen/activity_vertical_margin">
+        android:paddingVertical="5sp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
             android:textColor="@android:color/secondary_text_light"
-            app:bindRelativeDate="@{temporaryContactNumber.foundDate}"
+            app:bindTCN="@{temporaryContactNumber}"
             tools:text="Title" />
 
         <TextView

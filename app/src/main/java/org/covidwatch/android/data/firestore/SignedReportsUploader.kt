@@ -46,7 +46,7 @@ class SignedReportsUploader(var application: Application) {
             signedReports.forEach { signedReport ->
 
                 val signatureBytesBase64EncodedString =
-                    Base64.encodeToString(signedReport.signatureBytes, Base64.DEFAULT)
+                    Base64.encodeToString(signedReport.signatureBytes, Base64.NO_WRAP)
 
                 Log.i(TAG, "Uploading signed report ($signatureBytesBase64EncodedString)...")
 

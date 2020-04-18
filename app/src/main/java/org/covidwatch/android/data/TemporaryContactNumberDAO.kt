@@ -9,14 +9,14 @@ interface TemporaryContactNumberDAO {
     @get:Query("SELECT * FROM temporary_contact_numbers")
     val all: List<TemporaryContactNumber>
 
-    @get:Query("SELECT * FROM temporary_contact_numbers ORDER BY foundDate DESC")
+    @get:Query("SELECT * FROM temporary_contact_numbers ORDER BY found_date DESC")
     val allSortedByDescTimestamp: LiveData<List<TemporaryContactNumber>>
 
-    @get:Query("SELECT * FROM temporary_contact_numbers ORDER BY foundDate DESC")
+    @get:Query("SELECT * FROM temporary_contact_numbers ORDER BY found_date DESC")
     val pagedAllSortedByDescTimestamp: DataSource.Factory<Int, TemporaryContactNumber>
 
-    @Query("SELECT * FROM temporary_contact_numbers WHERE bytes = :identifier")
-    fun findByPrimaryKey(identifier: String): TemporaryContactNumber
+    @Query("SELECT * FROM temporary_contact_numbers WHERE bytes = :bytes LIMIT 1")
+    fun findByPrimaryKey(bytes: ByteArray): TemporaryContactNumber?
 
     @Query("SELECT * FROM temporary_contact_numbers WHERE was_potentially_infectious = '1' LIMIT 1")
     fun findFirstPotentiallyInfections(): LiveData<TemporaryContactNumber>

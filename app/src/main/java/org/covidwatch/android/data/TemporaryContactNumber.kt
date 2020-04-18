@@ -14,8 +14,14 @@ class TemporaryContactNumber {
     @ColumnInfo(name = "bytes", typeAffinity = ColumnInfo.BLOB)
     var bytes: ByteArray = ByteArray(0)
 
-    @ColumnInfo(name = "foundDate")
+    @ColumnInfo(name = "closest_estimated_distance_meters")
+    var closestEstimatedDistanceMeters: Double = Double.MAX_VALUE
+
+    @ColumnInfo(name = "found_date")
     var foundDate: Date = Date()
+
+    @ColumnInfo(name = "last_seen_date")
+    var lastSeenDate: Date = Date()
 
     @ColumnInfo(name = "was_potentially_infectious")
     var wasPotentiallyInfectious: Boolean = false

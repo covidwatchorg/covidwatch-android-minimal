@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-@Database(entities = [TemporaryContactNumber::class, SignedReport::class], version = 5, exportSchema = false)
+@Database(entities = [TemporaryContactNumber::class, SignedReport::class], version = 6, exportSchema = false)
 abstract class CovidWatchDatabase : RoomDatabase() {
 
     abstract fun temporaryContactNumberDAO(): TemporaryContactNumberDAO

@@ -19,6 +19,7 @@ import org.covidwatch.android.data.firestore.SignedReportsDownloadWorker
 import org.covidwatch.android.data.firestore.SignedReportsUploader
 import org.tcncoalition.tcnclient.TcnKeys
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class CovidWatchApplication : Application() {
@@ -115,16 +116,31 @@ class CovidWatchApplication : Application() {
     private val tcnBluetoothServiceCallback = object : TcnBluetoothServiceCallback {
         override fun generateTcn() = tcnKeys.generateTcn()
 
-        override fun onTcnFound(tcn: ByteArray) = logTcn(tcn)
+        override fun onTcnFound(tcn: ByteArray, estimatedDistance: Double?) = logTcn(tcn, estimatedDistance)
     }
 
-    private fun logTcn(tcn: ByteArray) {
+    private fun logTcn(tcn: ByteArray, estimatedDistance: Double?) {
         CovidWatchDatabase.databaseWriteExecutor.execute {
+
             val temporaryContactNumberDAO: TemporaryContactNumberDAO =
                 CovidWatchDatabase.getInstance(this).temporaryContactNumberDAO()
-            val temporaryContactNumber = TemporaryContactNumber()
-            temporaryContactNumber.bytes = tcn
-            temporaryContactNumberDAO.insert(temporaryContactNumber)
+
+            val temporaryContactNumber = temporaryContactNumberDAO.findByPrimaryKey(tcn)
+            if (temporaryContactNumber == null) {
+                val temporaryContactNumber = TemporaryContactNumber()
+                temporaryContactNumber.bytes = tcn
+                if (estimatedDistance != null && estimatedDistance < temporaryContactNumber.closestEstimatedDistanceMeters) {
+                    temporaryContactNumber.closestEstimatedDistanceMeters = estimatedDistance
+                }
+                temporaryContactNumberDAO.insert(temporaryContactNumber)
+            }
+            else {
+                temporaryContactNumber.lastSeenDate = Date()
+                if (estimatedDistance != null && estimatedDistance < temporaryContactNumber.closestEstimatedDistanceMeters) {
+                    temporaryContactNumber.closestEstimatedDistanceMeters = estimatedDistance
+                }
+                temporaryContactNumberDAO.update(temporaryContactNumber)
+            }
         }
     }
 

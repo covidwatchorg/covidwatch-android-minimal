@@ -140,7 +140,7 @@ class SignedReportsDownloadWorker(var context: Context, workerParams: WorkerPara
             )
 
             val signedReport = SignedReport(report, Ed25519Signature.fromByteArray(signatureBytes))
-            val signatureBase64EncodedString = Base64.encodeToString(signatureBytes, Base64.DEFAULT)
+            val signatureBase64EncodedString = Base64.encodeToString(signatureBytes, Base64.NO_WRAP)
 
             try {
                 signedReport.verify()

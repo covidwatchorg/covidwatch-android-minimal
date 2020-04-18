@@ -4,6 +4,7 @@
     <string name="title_download_self_reports">Download self-reports</string>
     <string name="message_download_self_reports">Download self-reports from the cloud?</string>
     <string name="title_self_report">Upload self-report</string>
+    <string name="title_discovered_tcns">Discovered TCNs</string>
     <string name="title_ok">Ok</string>
     <string name="message_dialog_self_report">Upload self-report to the cloud?</string>
     <string name="title_upload">Upload</string>

@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         vm = ViewModelProvider(this).get(BluetoothViewModel::class.java)
 
+        title = getString(R.string.title_discovered_tcns)
+
         initBluetoothAdapter()
         initLocationManager()
     }
