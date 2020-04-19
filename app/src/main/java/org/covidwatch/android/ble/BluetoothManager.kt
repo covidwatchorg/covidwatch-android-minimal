@@ -106,7 +106,7 @@ class BluetoothManagerImpl(
     }
 
     companion object {
-        private const val CHANNEL_ID = "COVIDWatchContactTracingNotificationChannel"
+        private const val CHANNEL_ID = "CovidWatchContactTracingNotificationChannel"
         const val NOTIFICATION_ID = 42
     }
 

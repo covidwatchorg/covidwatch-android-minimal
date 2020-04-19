@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">COVID Watch</string>
+    <string name="app_name">Covid Watch</string>
     <string name="title_download">Download</string>
     <string name="title_download_self_reports">Download self-reports</string>
     <string name="message_download_self_reports">Download self-reports from the cloud?</string>
@@ -20,6 +20,6 @@
 
     <string name="ble_location_permission">The permission to get BLE location data is required</string>
     <string name="foreground_notification_title">Privacy-preserving contact tracing is enabled</string>
-    <string name="foreground_notification_ble_off">Bluetooth is off. COVID Watch needs it to function propertly</string>
+    <string name="foreground_notification_ble_off">Bluetooth is off. Covid Watch needs it to function properly.</string>
 
 </resources>
