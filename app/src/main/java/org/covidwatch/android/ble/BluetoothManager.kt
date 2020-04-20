@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
@@ -25,13 +26,15 @@ abstract class BluetoothManager {
     open fun stopService() {}
 }
 
+// https://robertohuertas.com/2019/06/29/android_foreground_services/
 class BluetoothManagerImpl(
     private val context: Context,
     val tcnBluetoothServiceCallback: TcnBluetoothServiceCallback
 ) : BluetoothManager(), BluetoothStateListener {
 
     private var service: TcnBluetoothService? = null
-    private var binded = false
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var isBound = false
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -39,15 +42,22 @@ class BluetoothManagerImpl(
                 val notification = foregroundNotification(
                     context.getString(R.string.foreground_notification_title)
                 )
-                setForegroundNotification(NOTIFICATION_ID, notification)
+                startForegroundNotificationIfNeeded(NOTIFICATION_ID, notification)
                 setBluetoothStateListener(this@BluetoothManagerImpl)
                 startTcnExchange(tcnBluetoothServiceCallback)
+                // We need this lock so our service gets not affected by Doze Mode
+                wakeLock =
+                    (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                        newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TcnBluetoothService::lock").apply {
+                            acquire()
+                        }
+                    }
             }
-            binded = true
+            isBound = true
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            binded = false
+            isBound = false
         }
     }
 
@@ -66,6 +76,7 @@ class BluetoothManagerImpl(
             .setContentTitle(title)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
+            .setPriority(Notification.PRIORITY_HIGH)
             .setCategory(Notification.CATEGORY_SERVICE)
             .build()
     }
@@ -79,10 +90,18 @@ class BluetoothManagerImpl(
     }
 
     override fun stopService() {
-        if (binded) {
+        if (isBound) {
             service?.stopTcnExchange()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                service?.stopForeground(true)
+            }
             context.unbindService(serviceConnection)
-            binded = false
+            wakeLock?.let {
+                if (it.isHeld) {
+                    it.release()
+                }
+            }
+            isBound = false
         }
     }
 
@@ -96,7 +115,7 @@ class BluetoothManagerImpl(
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Foreground Service Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             )
             val manager = getSystemService(
                 context, NotificationManager::class.java
@@ -107,7 +126,7 @@ class BluetoothManagerImpl(
 
     companion object {
         private const val CHANNEL_ID = "CovidWatchContactTracingNotificationChannel"
-        const val NOTIFICATION_ID = 42
+        const val NOTIFICATION_ID = 1 // Don't use 0
     }
 
     override fun bluetoothStateChanged(bluetoothOn: Boolean) {

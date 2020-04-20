@@ -114,10 +114,22 @@ class CovidWatchApplication : Application() {
     /* TCN */
 
     private val tcnBluetoothServiceCallback = object : TcnBluetoothServiceCallback {
-        override fun generateTcn() = tcnKeys.generateTcn()
+        override fun generateTcn(): ByteArray {
+            val tcn = tcnKeys.generateTcn()
+            advertisedTcns.add(tcn)
+            if (advertisedTcns.size > 65535) {
+                advertisedTcns.removeAt(0)
+            }
+            return tcn
+        }
 
-        override fun onTcnFound(tcn: ByteArray, estimatedDistance: Double?) = logTcn(tcn, estimatedDistance)
+        override fun onTcnFound(tcn: ByteArray, estimatedDistance: Double?) {
+            if (advertisedTcns.contains(tcn)) { return }
+            logTcn(tcn, estimatedDistance)
+        }
     }
+
+    private val advertisedTcns: MutableList<ByteArray> = mutableListOf()
 
     private fun logTcn(tcn: ByteArray, estimatedDistance: Double?) {
         CovidWatchDatabase.databaseWriteExecutor.execute {

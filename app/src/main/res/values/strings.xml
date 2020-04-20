@@ -19,7 +19,7 @@
 
 
     <string name="ble_location_permission">The permission to get BLE location data is required</string>
-    <string name="foreground_notification_title">Privacy-preserving contact tracing is enabled</string>
-    <string name="foreground_notification_ble_off">Bluetooth is off. Covid Watch needs it to function properly.</string>
+    <string name="foreground_notification_title">Privacy-preserving contact tracing is running</string>
+    <string name="foreground_notification_ble_off">Turn on Bluetooth to allow Covid Watch to enable privacy-preserving contact tracing.</string>
 
 </resources>
