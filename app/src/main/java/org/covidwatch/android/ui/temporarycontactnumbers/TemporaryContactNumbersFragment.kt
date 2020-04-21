@@ -65,7 +65,7 @@ class TemporaryContactNumbersFragment : Fragment() {
             DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
         )
         binding.swipeRefreshLayout.setOnRefreshListener {
-            (activity?.application as? CovidWatchApplication)?.refreshOneTime()
+            (activity?.application as? CovidWatchApplication)?.scheduleRefreshOneTime()
             Handler().postDelayed({
                 binding.swipeRefreshLayout.isRefreshing = false
             }, TimeUnit.SECONDS.toMillis(1))
@@ -115,7 +115,7 @@ class TemporaryContactNumbersFragment : Fragment() {
                     builder.apply {
                         setPositiveButton(getString(R.string.title_download),
                             DialogInterface.OnClickListener { _, _ ->
-                                (activity?.application as? CovidWatchApplication)?.refreshOneTime()
+                                (activity?.application as? CovidWatchApplication)?.scheduleRefreshOneTime()
                             })
                         setNegativeButton(getString(R.string.title_cancel),
                             DialogInterface.OnClickListener { _, _ ->

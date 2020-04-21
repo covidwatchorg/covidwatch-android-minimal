@@ -4,11 +4,8 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.Context
+import android.content.*
 import android.content.Context.BIND_AUTO_CREATE
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -16,10 +13,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
 import org.covidwatch.android.ui.MainActivity
-import org.tcncoalition.tcnclient.bluetooth.BluetoothStateListener
-import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService
+import org.tcncoalition.tcnclient.bluetooth.*
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothService.LocalBinder
-import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
 
 abstract class BluetoothManager {
     open fun startService() {}
@@ -50,7 +45,10 @@ class BluetoothManagerImpl(
                 // We need this lock so our service gets not affected by Doze Mode
                 wakeLock =
                     (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                        newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TcnBluetoothService::lock").apply {
+                        newWakeLock(
+                            PowerManager.PARTIAL_WAKE_LOCK,
+                            "TcnBluetoothService::lock"
+                        ).apply {
                             acquire()
                         }
                     }

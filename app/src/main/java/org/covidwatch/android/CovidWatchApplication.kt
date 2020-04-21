@@ -31,25 +31,13 @@ class CovidWatchApplication : Application() {
     private var bluetoothManager: BluetoothManagerImpl? = null
 
     private var sharedPreferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
                 getString(R.string.preference_is_temporary_contact_number_logging_enabled) -> {
-                    val isContactEventLoggingEnabled = sharedPreferences.getBoolean(
-                        getString(R.string.preference_is_temporary_contact_number_logging_enabled),
-                        true
-                    )
-                    configureContactTracing(isContactEventLoggingEnabled)
+                    configureContactTracing()
                 }
             }
         }
-
-    private fun configureContactTracing(enabled: Boolean) {
-        if (enabled) {
-            bluetoothManager?.startService()
-        } else {
-            bluetoothManager?.stopService()
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -64,8 +52,12 @@ class CovidWatchApplication : Application() {
         signedReportsUploader = SignedReportsUploader(this)
         signedReportsUploader.startUploading()
 
-        schedulePeriodicRefresh()
+        configureContactTracing()
 
+        schedulePeriodicRefresh()
+    }
+
+    private fun configureContactTracing() {
         val isContactEventLoggingEnabled = getSharedPreferences(
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         ).getBoolean(
@@ -75,7 +67,15 @@ class CovidWatchApplication : Application() {
         configureContactTracing(isContactEventLoggingEnabled)
     }
 
-    fun refreshOneTime() {
+    private fun configureContactTracing(enabled: Boolean) {
+        if (enabled) {
+            bluetoothManager?.startService()
+        } else {
+            bluetoothManager?.stopService()
+        }
+    }
+
+    fun scheduleRefreshOneTime() {
         val constraints = Constraints.Builder()
             .setRequiresCharging(false)
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -113,6 +113,8 @@ class CovidWatchApplication : Application() {
 
     /* TCN */
 
+    private val advertisedTcns: MutableList<ByteArray> = mutableListOf()
+
     private val tcnBluetoothServiceCallback = object : TcnBluetoothServiceCallback {
         override fun generateTcn(): ByteArray {
             val tcn = tcnKeys.generateTcn()
@@ -124,12 +126,10 @@ class CovidWatchApplication : Application() {
         }
 
         override fun onTcnFound(tcn: ByteArray, estimatedDistance: Double?) {
-            if (advertisedTcns.contains(tcn)) { return }
+            if (advertisedTcns.contains(tcn)) return
             logTcn(tcn, estimatedDistance)
         }
     }
-
-    private val advertisedTcns: MutableList<ByteArray> = mutableListOf()
 
     private fun logTcn(tcn: ByteArray, estimatedDistance: Double?) {
         CovidWatchDatabase.databaseWriteExecutor.execute {
@@ -145,8 +145,7 @@ class CovidWatchApplication : Application() {
                     temporaryContactNumber.closestEstimatedDistanceMeters = estimatedDistance
                 }
                 temporaryContactNumberDAO.insert(temporaryContactNumber)
-            }
-            else {
+            } else {
                 temporaryContactNumber.lastSeenDate = Date()
                 if (estimatedDistance != null && estimatedDistance < temporaryContactNumber.closestEstimatedDistanceMeters) {
                     temporaryContactNumber.closestEstimatedDistanceMeters = estimatedDistance

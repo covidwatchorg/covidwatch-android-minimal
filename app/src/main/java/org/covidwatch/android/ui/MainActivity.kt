@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModelProvider
 import org.covidwatch.android.CovidWatchApplication
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
-import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,12 +42,12 @@ class MainActivity : AppCompatActivity() {
 
         initBluetoothAdapter()
         initLocationManager()
-        excludeFromBatteryOptimization()
+        requestIgnoreBatteryOptimizations()
     }
 
     public override fun onResume() {
         super.onResume()
-        (application as? CovidWatchApplication)?.refreshOneTime()
+        (application as? CovidWatchApplication)?.scheduleRefreshOneTime()
     }
 
     private fun startContactEventLogging() {
@@ -118,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val BATTERY_REQUEST = 2
-    private fun excludeFromBatteryOptimization() {
+    private fun requestIgnoreBatteryOptimizations() {
         val powerManager =
             this.getSystemService(AppCompatActivity.POWER_SERVICE) as PowerManager
         val packageName = this.packageName
@@ -127,13 +126,13 @@ class MainActivity : AppCompatActivity() {
             intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
             intent.data = Uri.parse("package:$packageName")
             if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-                Log.i(TAG, "Not on Battery Optimization whitelist")
+                Log.i(TAG, "Not ignoring battery optimizations")
                 this.startActivityForResult(
                     intent,
                     BATTERY_REQUEST
                 )
             } else {
-                Log.i(TAG, "On Battery Optimization whitelist")
+                Log.i(TAG, "Ignoring battery optimizations")
             }
         }
     }
