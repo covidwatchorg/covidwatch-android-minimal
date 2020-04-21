@@ -1,14 +1,18 @@
 package org.covidwatch.android.ui
 
+import android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -18,8 +22,13 @@ import androidx.lifecycle.ViewModelProvider
 import org.covidwatch.android.CovidWatchApplication
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
+import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothManager
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "MainActivity"
+    }
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var vm: BluetoothViewModel
@@ -34,6 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         initBluetoothAdapter()
         initLocationManager()
+        excludeFromBatteryOptimization()
     }
 
     public override fun onResume() {
@@ -82,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             val permissionStatus = ContextCompat.checkSelfPermission(
                 this,
-                ACCESS_FINE_LOCATION
+                ACCESS_COARSE_LOCATION
             )
 
             when (permissionStatus) {
@@ -90,7 +100,7 @@ class MainActivity : AppCompatActivity() {
                 PackageManager.PERMISSION_DENIED -> {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(
                             this,
-                            ACCESS_FINE_LOCATION
+                            ACCESS_COARSE_LOCATION
                         )
                     ) {
                         Toast.makeText(
@@ -100,9 +110,30 @@ class MainActivity : AppCompatActivity() {
                         ).show()
                     }
                     //TODO: If a user selects "Don't ask again" the function below does not show the system dialogue.  This prevents the user from ever progressing. Maybe this is an OK UX?
-                    val permissions = arrayOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
+                    val permissions = arrayOf(ACCESS_COARSE_LOCATION, ACCESS_BACKGROUND_LOCATION)
                     ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE)
                 }
+            }
+        }
+    }
+
+    private val BATTERY_REQUEST = 2
+    private fun excludeFromBatteryOptimization() {
+        val powerManager =
+            this.getSystemService(AppCompatActivity.POWER_SERVICE) as PowerManager
+        val packageName = this.packageName
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent()
+            intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+            intent.data = Uri.parse("package:$packageName")
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                Log.i(TAG, "Not on Battery Optimization whitelist")
+                this.startActivityForResult(
+                    intent,
+                    BATTERY_REQUEST
+                )
+            } else {
+                Log.i(TAG, "On Battery Optimization whitelist")
             }
         }
     }

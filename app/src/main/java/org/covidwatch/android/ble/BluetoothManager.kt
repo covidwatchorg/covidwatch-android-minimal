@@ -27,6 +27,8 @@ abstract class BluetoothManager {
 }
 
 // https://robertohuertas.com/2019/06/29/android_foreground_services/
+// https://github.com/opentrace-community/opentrace-android/issues/3
+// https://developer.android.com/training/monitoring-device-state/doze-standby
 class BluetoothManagerImpl(
     private val context: Context,
     val tcnBluetoothServiceCallback: TcnBluetoothServiceCallback
@@ -115,7 +117,7 @@ class BluetoothManagerImpl(
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Foreground Service Channel",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_DEFAULT
             )
             val manager = getSystemService(
                 context, NotificationManager::class.java
