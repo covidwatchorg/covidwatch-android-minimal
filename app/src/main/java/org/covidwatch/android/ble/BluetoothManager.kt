@@ -8,8 +8,8 @@ import android.content.*
 import android.content.Context.BIND_AUTO_CREATE
 import android.os.Build
 import android.os.IBinder
-import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import org.covidwatch.android.R
 import org.covidwatch.android.ui.MainActivity
@@ -30,7 +30,6 @@ class BluetoothManagerImpl(
 ) : BluetoothManager(), BluetoothStateListener {
 
     private var service: TcnBluetoothService? = null
-    private var wakeLock: PowerManager.WakeLock? = null
     private var isBound = false
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
@@ -42,16 +41,6 @@ class BluetoothManagerImpl(
                 startForegroundNotificationIfNeeded(NOTIFICATION_ID, notification)
                 setBluetoothStateListener(this@BluetoothManagerImpl)
                 startTcnExchange(tcnBluetoothServiceCallback)
-                // We need this lock so our service gets not affected by Doze Mode
-                wakeLock =
-                    (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                        newWakeLock(
-                            PowerManager.PARTIAL_WAKE_LOCK,
-                            "TcnBluetoothService::lock"
-                        ).apply {
-                            acquire()
-                        }
-                    }
             }
             isBound = true
         }
@@ -76,7 +65,7 @@ class BluetoothManagerImpl(
             .setContentTitle(title)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
-            .setPriority(Notification.PRIORITY_HIGH)
+            .setPriority(NotificationManagerCompat.IMPORTANCE_HIGH)
             .setCategory(Notification.CATEGORY_SERVICE)
             .build()
     }
@@ -92,15 +81,7 @@ class BluetoothManagerImpl(
     override fun stopService() {
         if (isBound) {
             service?.stopTcnExchange()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                service?.stopForeground(true)
-            }
             context.unbindService(serviceConnection)
-            wakeLock?.let {
-                if (it.isHeld) {
-                    it.release()
-                }
-            }
             isBound = false
         }
     }
