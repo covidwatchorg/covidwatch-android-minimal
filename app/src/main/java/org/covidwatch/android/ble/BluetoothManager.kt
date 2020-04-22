@@ -39,7 +39,7 @@ class BluetoothManagerImpl(
                 val notification = foregroundNotification(
                     context.getString(R.string.foreground_notification_title)
                 )
-//                startForegroundNotificationIfNeeded(NOTIFICATION_ID, notification)
+                startForegroundNotificationIfNeeded(NOTIFICATION_ID, notification)
                 setBluetoothStateListener(this@BluetoothManagerImpl)
                 startTcnExchange(tcnBluetoothServiceCallback)
                 // We need this lock so our service gets not affected by Doze Mode
