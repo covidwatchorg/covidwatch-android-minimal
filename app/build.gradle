@@ -25,6 +25,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField("String", "API_URL", "\"https://us-central1-tagstwo-431e3.cloudfunctions.net\"")
+        }
+        debug {
+            buildConfigField("String", "API_URL", "\"https://us-central1-tagstwo-431e3.cloudfunctions.net\"")
         }
     }
 
@@ -70,6 +74,8 @@ dependencies {
     implementation 'com.google.guava:guava:28.2-jre'
 //    implementation 'com.github.TCNCoalition:tcn-client-android:0.0.1'
     implementation project(":tcn-client-android:tcn-client-android")
+
+    implementation "com.squareup.okhttp3:okhttp:4.5.0"
 
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

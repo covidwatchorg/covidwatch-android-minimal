@@ -3,14 +3,21 @@ package org.covidwatch.android.data.firestore
 import android.app.Application
 import android.util.Base64
 import android.util.Log
-import com.google.firebase.firestore.Blob
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.covidwatch.android.BuildConfig
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.data.SignedReport
-import java.util.*
+import org.json.JSONObject
+import java.io.IOException
 
-class SignedReportsUploader(var application: Application) {
+class SignedReportsUploader(
+    application: Application,
+    private val okHttpClient: OkHttpClient
+) {
 
     companion object {
         private const val TAG = "SignedReportsUploader"
@@ -40,50 +47,78 @@ class SignedReportsUploader(var application: Application) {
     private fun uploadContactEvents(signedReports: List<SignedReport>) {
         if (signedReports.isEmpty()) return
 
-        val db = FirebaseFirestore.getInstance()
-
         CovidWatchDatabase.databaseWriteExecutor.execute {
             signedReports.forEach { signedReport ->
 
-                val signatureBytesBase64EncodedString =
-                    Base64.encodeToString(signedReport.signatureBytes, Base64.NO_WRAP)
+                val signatureBytesBase64EncodedString = base64String(signedReport.signatureBytes)
 
                 Log.i(TAG, "Uploading signed report ($signatureBytesBase64EncodedString)...")
 
                 signedReport.uploadState = SignedReport.UploadState.UPLOADING
                 signedReportDAO.update(signedReport)
 
-
-                val data = hashMapOf(
-                    FirestoreConstants.FIELD_TEMPORARY_CONTACT_KEY_BYTES to Blob.fromBytes(signedReport.temporaryContactKeyBytes),
-                    FirestoreConstants.FIELD_END_INDEX to signedReport.endIndex,
-                    FirestoreConstants.FIELD_MEMO_DATA to Blob.fromBytes(signedReport.memoData),
-                    FirestoreConstants.FIELD_MEMO_TYPE to signedReport.memoType,
-                    FirestoreConstants.FIELD_REPORT_VERIFICATION_PUBLIC_KEY_BYTES to Blob.fromBytes(signedReport.reportVerificationPublicKeyBytes),
-                    FirestoreConstants.FIELD_SIGNATURE_BYTES to Blob.fromBytes(signedReport.signatureBytes),
-                    FirestoreConstants.FIELD_START_INDEX to signedReport.startIndex,
-                    FirestoreConstants.FIELD_TIMESTAMP to FieldValue.serverTimestamp()
-                )
-                db.collection(FirestoreConstants.COLLECTION_SIGNED_REPORTS).add(data)
-                    .addOnSuccessListener { _ ->
+                try {
+                    val json = signedReport.toJson()
+                    val isSuccessful = submitReport(json)
+                    if (isSuccessful) {
+                        uploaded(signedReport)
                         Log.i(TAG, "Uploaded signed report ($signatureBytesBase64EncodedString)")
-                        signedReport.uploadState = SignedReport.UploadState.UPLOADED
-                        CovidWatchDatabase.databaseWriteExecutor.execute {
-                            signedReportDAO.update(signedReport)
-                        }
+                    } else {
+                        notUploaded(signedReport)
+                        Log.e(TAG, "Uploading signed report ($signatureBytesBase64EncodedString) failed")
                     }
-                    .addOnFailureListener { e ->
-                        Log.e(
-                            TAG,
-                            "Uploading signed report ($signatureBytesBase64EncodedString) failed: $e"
-                        )
-                        signedReport.uploadState = SignedReport.UploadState.NOTUPLOADED
-                        CovidWatchDatabase.databaseWriteExecutor.execute {
-                            signedReportDAO.update(signedReport)
-                        }
-                    }
+                } catch (e: IOException) {
+                    notUploaded(signedReport)
+                    Log.e(TAG, "Uploading signed report ($signatureBytesBase64EncodedString) failed", e)
+                }
             }
         }
     }
 
+    private fun uploaded(signedReport: SignedReport) {
+        signedReport.uploadState = SignedReport.UploadState.UPLOADED
+        signedReportDAO.update(signedReport)
+    }
+
+    private fun notUploaded(signedReport: SignedReport) {
+        signedReport.uploadState = SignedReport.UploadState.NOTUPLOADED
+        signedReportDAO.update(signedReport)
+    }
+
+    private fun SignedReport.toJson(): String {
+        val data = mapOf(
+            FirestoreConstants.FIELD_TEMPORARY_CONTACT_KEY_BYTES to base64String(temporaryContactKeyBytes),
+            FirestoreConstants.FIELD_START_INDEX to startIndex,
+            FirestoreConstants.FIELD_END_INDEX to endIndex,
+            FirestoreConstants.FIELD_MEMO_DATA to base64String(memoData),
+            FirestoreConstants.FIELD_MEMO_TYPE to memoType,
+            FirestoreConstants.FIELD_REPORT_VERIFICATION_PUBLIC_KEY_BYTES to base64String(reportVerificationPublicKeyBytes),
+            FirestoreConstants.FIELD_SIGNATURE_BYTES to base64String(signatureBytes)
+        )
+
+        return JSONObject(data).toString()
+    }
+
+    private fun base64String(input: ByteArray): String {
+        return Base64.encodeToString(input, Base64.NO_WRAP)
+    }
+
+    @Throws(IOException::class)
+    private fun submitReport(json: String): Boolean {
+        val apiUrl = BuildConfig.API_URL
+        val url = "$apiUrl/submitReport"
+        val body = json.toRequestBody(contentType())
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        return okHttpClient.newCall(request).execute().use { response ->
+            response.isSuccessful
+        }
+    }
+
+    private fun contentType(): MediaType {
+        return "application/json; charset=utf-8".toMediaType()
+    }
 }

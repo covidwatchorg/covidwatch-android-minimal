@@ -10,6 +10,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import okhttp3.OkHttpClient
 import org.covidwatch.android.ble.BluetoothManagerImpl
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.data.SignedReport
@@ -49,7 +50,9 @@ class CovidWatchApplication : Application() {
 
         bluetoothManager = BluetoothManagerImpl(this, tcnBluetoothServiceCallback)
 
-        signedReportsUploader = SignedReportsUploader(this)
+        // TODO: OkHttpClients Should Be Shared. Declare it as singleton in DI
+        val okHttpClient = OkHttpClient()
+        signedReportsUploader = SignedReportsUploader(this, okHttpClient)
         signedReportsUploader.startUploading()
 
         configureContactTracing()
