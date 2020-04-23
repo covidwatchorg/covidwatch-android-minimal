@@ -20,7 +20,7 @@ import org.covidwatch.android.data.firestore.SignedReportsDownloadWorker
 import org.covidwatch.android.data.firestore.SignedReportsUploader
 import org.tcncoalition.tcnclient.TcnKeys
 import org.tcncoalition.tcnclient.bluetooth.TcnBluetoothServiceCallback
-import java.util.*
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class CovidWatchApplication : Application() {
