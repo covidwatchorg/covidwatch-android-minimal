@@ -1,11 +1,15 @@
 package org.covidwatch.android.ui.temporarycontactnumbers
 
 import android.app.Application
-import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Handler
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingComponent
 import androidx.databinding.DataBindingUtil
@@ -15,13 +19,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import org.covidwatch.android.CovidWatchApplication
+import org.covidwatch.android.CovidWatchTcnManager
 import org.covidwatch.android.R
 import org.covidwatch.android.data.BluetoothViewModel
-import org.covidwatch.android.ui.temporarycontactnumbers.adapters.FragmentDataBindingComponent
 import org.covidwatch.android.data.CovidWatchDatabase
 import org.covidwatch.android.databinding.FragmentTemporaryContactNumbersBinding
+import org.covidwatch.android.ui.temporarycontactnumbers.adapters.FragmentDataBindingComponent
+import org.tcncoalition.tcnclient.TcnClient
 import java.util.concurrent.TimeUnit
-
 
 class TemporaryContactNumbersFragment : Fragment() {
 
@@ -132,14 +137,14 @@ class TemporaryContactNumbersFragment : Fragment() {
                     val builder = AlertDialog.Builder(it)
                     builder.setMessage(R.string.message_dialog_self_report)
                     builder.apply {
-                        setPositiveButton(getString(R.string.title_upload),
-                            DialogInterface.OnClickListener { _, _ ->
-                                (activity?.application as? CovidWatchApplication)?.generateAndUploadReport()
-                            })
-                        setNegativeButton(getString(R.string.title_cancel),
-                            DialogInterface.OnClickListener { _, _ ->
-                                // User cancelled the dialog
-                            })
+                        setPositiveButton(
+                            getString(R.string.title_upload)
+                        ) { _, _ ->
+                            //TODO: move uploading to a separate class and leave TcnManager only
+                            // with generating report part
+                            (TcnClient.tcnManager as CovidWatchTcnManager).generateAndUploadReport()
+                        }
+                        setNegativeButton(getString(R.string.title_cancel), null)
                     }
                     // Create the AlertDialog
                     builder.create()
@@ -149,22 +154,4 @@ class TemporaryContactNumbersFragment : Fragment() {
         }
         return super.onOptionsItemSelected(item)
     }
-
-    private fun setContactEventLogging(enabled: Boolean) {
-
-        temporaryContactNumbersViewModel.isContactEventLoggingEnabled.value = enabled
-
-        val application = context?.applicationContext ?: return
-        val sharedPref = application.getSharedPreferences(
-            application.getString(R.string.preference_file_key), Context.MODE_PRIVATE
-        ) ?: return
-        with(sharedPref.edit()) {
-            putBoolean(
-                application.getString(R.string.preference_is_temporary_contact_number_logging_enabled),
-                enabled
-            )
-            commit()
-        }
-    }
-
 }

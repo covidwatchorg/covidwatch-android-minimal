@@ -1,7 +1,7 @@
 package org.covidwatch.android.ui
 
 import android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             val permissionStatus = ContextCompat.checkSelfPermission(
                 this,
-                ACCESS_COARSE_LOCATION
+                ACCESS_FINE_LOCATION
             )
 
             when (permissionStatus) {
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
                 PackageManager.PERMISSION_DENIED -> {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(
                             this,
-                            ACCESS_COARSE_LOCATION
+                            ACCESS_FINE_LOCATION
                         )
                     ) {
                         Toast.makeText(
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                         ).show()
                     }
                     //TODO: If a user selects "Don't ask again" the function below does not show the system dialogue.  This prevents the user from ever progressing. Maybe this is an OK UX?
-                    val permissions = arrayOf(ACCESS_COARSE_LOCATION, ACCESS_BACKGROUND_LOCATION)
+                    val permissions = arrayOf(ACCESS_FINE_LOCATION, ACCESS_BACKGROUND_LOCATION)
                     ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE)
                 }
             }
@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     private val BATTERY_REQUEST = 2
     private fun requestIgnoreBatteryOptimizations() {
         val powerManager =
-            this.getSystemService(AppCompatActivity.POWER_SERVICE) as PowerManager
+            this.getSystemService(POWER_SERVICE) as PowerManager
         val packageName = this.packageName
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val intent = Intent()
