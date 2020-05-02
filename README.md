@@ -1,6 +1,14 @@
-# CovidWatch Android POC
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Android POC for www.covid-watch.org
+# CovidWatch Android Minimal App
+
+Android app for clean and easy testing of the [TCN Protocol](https://github.com/TCNCoalition/tcn-client-android). A part of tha family of apps from www.covid-watch.org
+
+## Who are we? What is this app?
+
+This repository is focused on the implementation of a simple Android UI to robustly test integration with the [TCN Protocol](https://github.com/TCNCoalition/tcn-client-android) for the Covid Watch app. Our goals are to:
+- Allow users to easily start and stop anonymously recording interactions with others using the [TCN Protocol](https://github.com/TCNCoalition/tcn-client-android).
+- View these interactions easily on their screens
 
 ## Setup
 
@@ -26,40 +34,27 @@ To Update:
 git submodule update --remote
 ```
 
-BLE is a low power protocol with cross-platform OS support for background operation. The app will be able to constantly run, detecting and logging all temporary contact numbers with other nearby app users.
+## Looking to contribute?
 
-The approach currently being investigated utilizes BLE functionality for background advertisement and scanning. Due to different system requirements for Android and iOS, the protocol works differently depending on the operating systems of the devices involved. The key challenges are:
+Reach out to @zssz or @Apisov
 
-1. iOS devices acting as peripherals in the background can only be found by centrals that are scanning for their specific service UUID. These peripherals must establish a connection to transfer any data.
-2. Android devices have an unfixed bug (https://issuetracker.google.com/issues/125138967) where subsequent connections with many devices can cause the bluetooth system to lock up.
+## FAQ
 
-The current solution is a hybrid model that is asymmetric for communication between iOS and Android. All devices will simultaneously act as peripherals and centrals, but only some devices will be able to detect others, and only some devices will need to establish a connection to exchange data.
+What is the anonymous protocol for communication between phones? How does it work and who designed it?
 
-Android Peripheral
+Covid Watch uses Temporary Contact Numbers, a decentralized, privacy-first contact tracing protocol developed by the [TCN Coalition](https://tcn-coalition.org/). This protocol is built to be extensible, with the goal of providing interoperability between contact tracing applications. You can read more about it on their [Github](https://github.com/TCNCoalition/TCN).
 
-- Android devices will act as BLE peripherals in the background and they will advertise a service UUID specific to this app.
-- In the advertisement packet they will use the service data field [https://developer.android.com/reference/android/bluetooth/le/AdvertiseData.Builder] to advertise a randomly generated Contact Event Number.
-- They will log all previously advertised CENs, and periodically update the CEN when the app is woken up for Bluetooth or timer events.
-- Functionality will soon be added for iOS centrals to connect to Android peripherals. During this process the iOS central will transmit a CEN and the Android device will log it.
+What's this repository vs the other repositories in the covid19risk Organization?
 
-iOS Peripheral
+This is the repository for development of the front-facing Android mobile app for Covid Watch, including the UX and tie-ins to the TCN Bluetooth Protocol and backend services. Related repos:
+- [Android Minimal:](https://github.com/covid19risk/covidwatch-android-minimal) Proof of concept pilot app for testing integrations with the bluetooth protocol.
+- [TCN:](https://github.com/TCNCoalition/tcn-client-android) Implementation of bluetooth protocol.
 
-- iOS devices will act as BLE peripherals in the background and they will advertise a service UUID specific to this app with a readable characteristic exposed.
-- If a central establishes a connection and requests to read the characteristic field the peripheral will randomly generate a CEN, log it locally, and transmit it to the central.
+## Contributors
 
-Android Central
+- Zsombor Szabo (@zssz)
+- Pavlo (@Apisov)
 
-- Android devices will act as BLE centrals in the background and they will scan for the service UUID specific to this app.
-- When they read an advertisement packet from an Android peripheral they will log the information in the service data field as the CEN.
-- Android centrals are unable to detect iOS peripherals.
+## Join the cause!
 
-iOS Central
-
-- iOS devices will act as BLE centrals in the background and they will scan for the service UUID specific to this app.
-- When they read an advertisement packet from an Android peripheral they will log the attached service field as the CEN.
-- When they read an advertisement packet from an iOS peripheral they will establish a connection and request the characteristic field. They will then log the returned characteristic field as the CEN and disconnect.
-- Functionality will soon be added for iOS centrals to connect to Android peripherals. During this process the iOS central will transmit a CEN and the Android device will log it.
-
-Under the current model, Android devices will be able to detect other Android devices and iOS devices will be able to detect all devices. The asymmetry of the model is not ideal, but all phones will be able to locally share a Contact Event Number when in the vicinity of other phones, so the requirements specified in the privacy model are achieved. For Android to Android or iOS to iOS detection, two temporary contact number numbers will likely be generated for each interaction (because each phone acts as both a peripheral and a central). This can be trivially adjusted for in the risk model.
-
-In an upcoming update, the ability for iOS centrals to write to Android peripherals will be added. This will enable symmetric communication between all device types and enable an updated cryptographic system.
+Interested in volunteering with Covid Watch? Check out our [get involved page](https://covid-watch.org/collaborate) and send us an email at contact@covid-watch.org!
